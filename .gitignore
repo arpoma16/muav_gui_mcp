@@ -1,4 +1,10 @@
+# dependencies
 node_modules/
-build/
-*.log
-.env*
+
+# misc
+.env
+.deployment
+.DS_Store
+
+# build
+lib/

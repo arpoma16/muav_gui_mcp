@@ -1,280 +1,52 @@
-# MultiUAV GUI MCP Server
+# Weather MCP Server
 
-A Model Context Protocol (MCP) server that provides standardized access to MultiUAV GUI functionality, enabling LLMs to interact with UAV devices, missions, and flight data.
+This is a sample MCP Server in TypeScript implementing weather tools with mock responses. It can be used as a scaffold for your own MCP Server. It includes the following features: 
 
-## Overview
+- **Weather Tool**: A tool that provides mocked weather information based on the given location.
+- **Connect to Agent Builder**: A feature that allows you to connect the MCP server to the Agent Builder for testing and debugging.
+- **Debug SSE in MCP Inspector**: A feature that allows you to debug the MCP Server using the MCP Inspector.
+- **Debug STDIO in MCP Inspector**: A feature that allows you to debug the MCP Server using the MCP Inspector.
 
-This MCP server connects to the MultiUAV GUI application and exposes its capabilities through:
-- **Resources**: Access to device information, positions, missions, and configuration
-- **Tools**: Commands for controlling UAVs, managing missions, and gimbal control
-- **Prompts**: Common data analysis tasks for flight operations
+## Get started with the Weather MCP Server template
 
-## Features
+> **Prerequisites**
+>
+> To run the MCP Server in your local dev machine, you will need: [Node.js](https://nodejs.org/)
 
-### Resources
-- **Device Information**: List all UAV devices or get specific device details
-- **Position Data**: Current and historical position data for UAVs
-- **Mission Management**: Access to missions and routes
-- **Server Configuration**: System settings and status
+1. Open VS Code Debug panel. Select `Debug in Agent Builder` or press `F5` to start debugging the MCP server.
+2. Use AI Toolkit Agent Builder to test the server with [this prompt](vscode://ms-windows-ai-studio.windows-ai-studio/open_prompt_builder?model_id=github/gpt-4o-mini&&system_prompt=You%20are%20a%20weather%20forecast%20professional%20that%20can%20tell%20weather%20information%20based%20on%20given%20location&&user_prompt=What%20is%20the%20weather%20in%20Shanghai?&track_from=vsc_md&mcp=muav_gui_assistant). Server will be auto-connected to the Agent Builder.
+3. Click `Run` to test the server with the prompt.
 
-### Tools
-- **Send Commands**: Execute various commands on UAV devices
-- **Mission Control**: Load and start missions on UAVs
-- **Gimbal Control**: Precise control of camera gimbal positioning
-- **Task Management**: Send inspection tasks to Ground Control Station
-- **Command Discovery**: Get available commands for devices
+**Congratulations**! You have successfully run the Weather MCP Server in your local dev machine via Agent Builder as the MCP Client.
+![DebugMCP](https://raw.githubusercontent.com/microsoft/windows-ai-studio-templates/refs/heads/dev/mcpServers/mcp_debug.gif)
 
-### Prompts
-- **Status Analysis**: Analyze device statuses and health
-- **Safety Checks**: Pre-flight safety verification
-- **Mission Planning**: Assistance with mission planning
-- **Performance Analysis**: Flight data and performance metrics analysis
-- **Battery Monitoring**: Identify devices with low battery levels
+## What's included in the template
+| Folder / File| Contents                                     |
+| ------------ | -------------------------------------------- |
+| `.vscode`    | VSCode files for debugging                   |
+| `.aitk`      | Configurations for AI Toolkit                |
+| `src`        | The source code for the weather mcp server   |
 
-## Installation
+## How to debug the Weather MCP Server
 
-### Prerequisites
+> Notes:
+> - [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is a visual developer tool for testing and debugging MCP servers.
+> - All debugging modes support breakpoints, so you can add breakpoints to the tool implementation code.
 
-- **Node.js 18+** ✅ (Node.js 20 detected)
-- **npm** or **yarn**
+| Debug Mode | Description | Steps to debug |
+| ---------- | ----------- | --------------- |
+| Agent Builder | Debug the MCP server in the Agent Builder via AI Toolkit. | 1. Open VS Code Debug panel. Select `Debug in Agent Builder` and press `F5` to start debugging the MCP server.<br>2. Use AI Toolkit Agent Builder to test the server with [this prompt](vscode://ms-windows-ai-studio.windows-ai-studio/open_prompt_builder?model_id=github/gpt-4o-mini&&system_prompt=You%20are%20a%20weather%20forecast%20professional%20that%20can%20tell%20weather%20information%20based%20on%20given%20location&&user_prompt=What%20is%20the%20weather%20in%20Shanghai?&track_from=vsc_md&mcp=muav_gui_assistant). Server will be auto-connected to the Agent Builder.<br>3. Click `Run` to test the server with the prompt. |
+| MCP Inspector for SSE | Debug the MCP server using the MCP Inspector. | 1. Open VS Code Debug panel. Select `Debug SSE in Inspector (Edge)` or `Debug SSE in Inspector (Chrome)`. Press F5 to start debugging.<br>2. When MCP Inspector launches in the browser, click the `Connect` button to connect this MCP server.<br>3. Then you can `List Tools`, select a tool, input parameters, and `Run Tool` to debug your server code.<br> |
+| MCP Inspector for STDIO | Debug the MCP server using the MCP Inspector. | 1. Open VS Code Debug panel. Select `Debug STDIO in Inspector`. Press F5 to start debugging.<br>2. When MCP Inspector launches in your default browser, click the `Connect` button to connect this MCP server.<br>3. Then you can `List Tools`, select a tool, input parameters, and `Run Tool` to debug your server code.<br>4. Of course, you can add breakpoint to the tool implementation code. |
 
-### Setup Steps
+## Default Ports and customizations
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd muav_gui_mcp
-   ```
+| Debug Mode | Ports | Definitions | Customizations | Note |
+| ---------- | ----- | ------------ | -------------- |-------------- |
+| Agent Builder | 3001 | [tasks.json](.vscode/tasks.json) | Edit [launch.json](.vscode/launch.json), [tasks.json](.vscode/tasks.json), [index.ts](src/index.ts), [mcp.json](.aitk/mcp.json) to change ports and parameters. | N/A |
+| MCP Inspector for SSE | 3001 (Server); 5173 and 3000 (Inspector) | [tasks.json](.vscode/tasks.json) | Edit [launch.json](.vscode/launch.json), [tasks.json](.vscode/tasks.json), [index.ts](src/index.ts), [mcp.json](.aitk/mcp.json) to change above ports.| N/A |
+| MCP Inspector for STDIO | N/A | [launch.json](.vscode/launch.json) | N/A |   When launching debugging, it launches MCP Inspector with MCP settings pre-configured (default to `npm --silent run dev:stdio`). After clicking `Connect`, Inspector launches MCP server on STDIO, which is also auto-attached for debugging via VSCode. | 
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+## Feedback
 
-3. **Configure the API endpoint**
-   
-   Copy the example environment file and configure it:
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` file with your settings:
-   ```bash
-   MUAV_API_URL=https://your-server:4000/api
-   MUAV_API_TOKEN=your-auth-token-if-needed
-   DEBUG=false
-   ```
-
-   Alternatively, you can edit `config.ts` directly for quick changes.
-
-## Usage
-
-### Running the Server
-
-```bash
-npm start
-# or
-npx ts-node server.ts
-```
-
-The server will connect via stdio transport and log when ready.
-
-### Using with MCP Clients
-
-This server implements the standard MCP protocol and can be used with any MCP-compatible client:
-
-1. **Configure your MCP client** to connect to this server
-2. **Use Resources** to fetch UAV data:
-   - `devices://all` - All devices
-   - `device://{id}` - Specific device
-   - `positions://all` - All positions
-   - `missions://all` - All missions
-
-3. **Use Tools** to control UAVs:
-   - `send_command` - Send any command
-   - `load_mission` - Load mission waypoints
-   - `start_mission` - Begin mission execution
-   - `control_gimbal` - Control camera gimbal
-
-4. **Use Prompts** for analysis:
-   - `analyze_status` - Device status summary
-   - `safety_check` - Pre-flight checks
-   - `mission_planning` - Mission assistance
-
-## Project Structure
-
-```
-muav_gui_mcp/
-├── server.ts          # Main server setup and initialization
-├── resources.ts       # Resource definitions and registration
-├── tools.ts          # Tool definitions and registration
-├── prompts.ts        # Prompt definitions and registration
-├── package.json      # Dependencies and scripts
-└── README.md         # This file
-```
-
-## API Integration
-
-This server integrates with the MultiUAV GUI REST API. Key endpoints used:
-
-- `GET /devices` - Device information
-- `GET /positions` - Position data
-- `GET /missions/` - Mission data
-- `POST /comands/send` - Send commands
-- `POST /missions/sendTask` - Send tasks
-
-## Configuration
-
-### Environment Variables
-
-You can configure the server using environment variables in a `.env` file:
-
-```bash
-# MultiUAV GUI API Configuration
-MUAV_API_URL=https://localhost:4000/api
-MUAV_API_TOKEN=your_auth_token_here
-
-# Server Configuration
-SERVER_PORT=3000
-REQUEST_TIMEOUT=5000
-
-# Development Configuration
-DEBUG=false
-SSL_VERIFY=true
-```
-
-### Configuration Methods
-
-#### Method 1: Environment Variables (Recommended)
-1. Copy `.env.example` to `.env`
-2. Edit the values in `.env`
-3. The server will automatically load these settings
-
-#### Method 2: Direct Configuration
-Edit `config.ts` directly for quick changes:
-```typescript
-export const config = {
-  BASE_URL: "https://your-server:4000/api",
-  API_TOKEN: "Bearer your-token",
-  DEBUG: true,
-  // ... other settings
-};
-```
-
-### API Authentication
-
-If your MultiUAV GUI API requires authentication, modify the API helper functions in each module to include appropriate headers.
-
-## Development
-
-### Adding New Resources
-
-1. Add resource definition in `resources.ts`
-2. Follow the existing pattern with `server.registerResource()`
-3. Update this README with the new resource
-
-### Adding New Tools
-
-1. Add tool definition in `tools.ts`
-2. Define input schema using Zod
-3. Implement the tool handler function
-4. Update this README with the new tool
-
-### Adding New Prompts
-
-1. Add prompt definition in `prompts.ts`
-2. Define any required arguments
-3. Implement the prompt handler
-4. Update this README with the new prompt
-
-## Examples
-
-### Using the Send Command Tool
-
-```typescript
-// Example: Emergency landing for all UAVs
-{
-  "deviceId": -1,
-  "type": "emergency_land",
-  "attributes": {}
-}
-
-// Example: Control specific UAV gimbal
-{
-  "deviceId": 1,
-  "type": "Gimbal",
-  "attributes": {
-    "pitch": -90,
-    "yaw": 0,
-    "roll": 0
-  }
-}
-```
-
-### Mission Loading Example
-
-```typescript
-{
-  "deviceId": 1,
-  "routes": [
-    {
-      "name": "Survey Mission",
-      "uav": "uav_1",
-      "wp": [
-        {
-          "pos": [37.1234, -6.5678, 50],
-          "yaw": 0,
-          "gimbal": -45,
-          "action": {"video_start": 0}
-        }
-      ],
-      "attributes": {
-        "mode_landing": 2,
-        "mode_yaw": 3,
-        "idle_vel": 5
-      }
-    }
-  ]
-}
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Connection Refused**: Ensure MultiUAV GUI API is running and accessible
-2. **Authentication Errors**: Check if API requires authentication tokens
-3. **Timeout Errors**: Verify network connectivity and API response times
-4. **Invalid Commands**: Use `get_available_commands` tool to see valid options
-
-### Debug Mode
-
-Enable debug logging by setting:
-```bash
-export DEBUG=1
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## License
-
-[Specify your license here]
-
-## Support
-
-For issues and questions:
-- GitHub Issues: [Repository Issues](link-to-issues)
-- Email: arpoma167@gmail.com
-- Documentation: [MultiUAV GUI Docs](https://grvc.us.es/)
-
-## Related Projects
-
-- [MultiUAV GUI](https://github.com/alvcaballero/multiuav_gui/) - Main UAV management interface
-- [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) - MCP implementation
-- [Model Context Protocol](https://modelcontextprotocol.io) - Protocol specification
+If you have any feedback or suggestions for this template, please open an issue on the [AI Toolkit GitHub repository](https://github.com/microsoft/vscode-ai-toolkit/issues)

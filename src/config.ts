@@ -5,10 +5,10 @@ dotenv.config();
 
 export const config = {
   // Base URL for multiuav_gui API
-  BASE_URL: process.env.MUAV_API_URL || "https://localhost:4000/api",
+  BASE_URL: process.env.MUAV_API_URL || "http://localhost:4000/api",
 
   // API authentication token (if required)
-  API_TOKEN: process.env.MUAV_API_TOKEN || "",
+  API_TOKEN: process.env.MUAV_API_TOKEN || false,
 
   // Server configuration
   SERVER_PORT: parseInt(process.env.SERVER_PORT || "3000"),

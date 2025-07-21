@@ -1,7 +1,8 @@
 import {
   McpServer,
   ResourceTemplate,
-} from "@modelcontextprotocol/sdk/server/mcp";
+} from "@modelcontextprotocol/sdk/server/mcp.js";
+
 import axios from "axios";
 import { config } from "./config";
 
