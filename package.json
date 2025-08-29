@@ -3,13 +3,16 @@
   "version": "0.0.1",
   "description": "My MCP Server",
   "main": "./lib/src/index.js",
+  "type": "module",
   "scripts": {
-    "dev:sse": "nodemon --exec node --inspect=9239 --signal SIGINT -r ts-node/register ./src/index.ts sse",
-    "dev:stdio": "nodemon --quiet --exec node --signal SIGINT -r ts-node/register ./src/index.ts stdio",
+    "dev:sse": "tsx watch ./src/index.ts sse",
+    "dev:stdio": "tsx watch ./src/index.ts stdio",
+    "dev:http": "tsx watch ./src/index.ts http",
     "dev:inspector": "mcp-inspector",
     "build": "tsc --build",
     "start:sse": "node ./lib/src/index.js sse",
-    "start:sdtio": "node ./lib/src/index.js stdio"
+    "start:sdtio": "node ./lib/src/index.js stdio",
+    "start:http": "node ./lib/src/index.js http"
   },
   "author": "",
   "license": "ISC",
@@ -26,6 +29,10 @@
     "@types/node": "^22.13.10",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.4",
     "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20.19.0"
   }
 }

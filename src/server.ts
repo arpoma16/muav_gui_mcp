@@ -1,8 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 //import { z } from "zod";
-import { registerResources } from "./resources";
-import { registerPrompts } from "./prompts";
-import { registerTools } from "./tools";
+import { registerResources } from "./resources.js";
+import { registerPrompts } from "./prompts.js";
+import { registerTools } from "./tools/index.js";
 
 // Create server instance
 const server = new McpServer({

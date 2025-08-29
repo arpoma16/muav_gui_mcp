@@ -1,16 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import axios from "axios";
-import { config } from "./config";
-
-// Helper to call the multiuav_gui API
-async function apiGet(path: string, params: any = {}) {
-  const res = await axios.get(`${config.BASE_URL}${path}`, {
-    params,
-    timeout: config.REQUEST_TIMEOUT,
-    headers: config.API_TOKEN ? { Authorization: config.API_TOKEN } : {},
-  });
-  return res.data;
-}
+import { apiGet } from "./utils.js";
 
 export function registerPrompts(server: McpServer) {
   // Prompt: Analyze Device Statuses

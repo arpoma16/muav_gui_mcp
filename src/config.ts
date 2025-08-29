@@ -11,7 +11,7 @@ export const config = {
   API_TOKEN: process.env.MUAV_API_TOKEN || false,
 
   // Server configuration
-  SERVER_PORT: parseInt(process.env.SERVER_PORT || "3000"),
+  SERVER_PORT: parseInt(process.env.SERVER_PORT || "3001"),
 
   // Request timeout in milliseconds
   REQUEST_TIMEOUT: parseInt(process.env.REQUEST_TIMEOUT || "5000"),

@@ -1,8 +1,8 @@
 {
-    "servers": {
-        "local-server-muav_gui_assistant": {
-            "type": "sse",
-            "url": "http://localhost:3001/sse"
-        }
+  "servers": {
+    "local-server-muav_gui_assistant": {
+      "type": "http",
+      "url": "http://localhost:3001/mcp"
     }
+  }
 }
