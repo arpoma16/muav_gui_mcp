@@ -93,17 +93,16 @@ export function registerRosTools(server: McpServer) {
     "pub_ros_topic",
     "Publish a message to a ROS topic",
     {
-      args: {
-        topic: z.string().min(1).max(100),
-        messageType: z.string().min(1).max(1000),
-        message: z.string().min(1).max(1000),
-      },
+      topic: z.string().min(1).max(100),
+      messageType: z.string().min(1).max(1000),
+      message: z.object({}).passthrough(),
     },
     async ({ topic, messageType, message }) => {
+      console.log("message", message);
       const result = await apiPost(`/ros/publish`, {
-        topic,
-        messageType,
-        message,
+        topic: topic,
+        messageType: messageType,
+        message: message,
       });
       return {
         content: [
