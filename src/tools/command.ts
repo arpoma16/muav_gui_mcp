@@ -2,11 +2,10 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { apiGet, apiPost } from "../utils.js";
 
-export function registerOtherTools(server: McpServer) {
-  // Tool: Send Command to Device
+export function registerCommandTools(server:McpServer){
   server.tool(
     "send_command",
-    "Send a command to a UAV device",
+    "Send a command to a  registered device/robot",
     {
       deviceId: z.number().describe("Device ID to send command to"),
       type: z.string().describe("Type of command to send"),
@@ -28,6 +27,7 @@ export function registerOtherTools(server: McpServer) {
       };
     }
   );
+
 
   // Tool: Load Mission
   server.tool(
@@ -71,6 +71,7 @@ export function registerOtherTools(server: McpServer) {
     }
   );
 
+
   //Tool: Start Mission
   server.tool(
     "start_mission",
@@ -94,7 +95,8 @@ export function registerOtherTools(server: McpServer) {
       };
     }
   );
-  //
+
+    //
   //// Tool: Control Gimbal
   //server.registerTool(
   //  "control_gimbal",
@@ -217,4 +219,6 @@ export function registerOtherTools(server: McpServer) {
       };
     }
   );
+
+
 }
