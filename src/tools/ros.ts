@@ -32,8 +32,8 @@ export function registerRosTools(server: McpServer) {
   );
 
   server.tool(
-    "get_ros_topics_message_type",
-    "Get the message type for a given ROS topic",
+    "get_ros_message_type",
+    "Get the message type for a given ROS topic or ros service",
     { topic: z.string().min(1).max(100).describe("Topic name") },
     async ({ topic }) => {
       try {
@@ -129,6 +129,39 @@ export function registerRosTools(server: McpServer) {
             {
               type: "text",
               text: JSON.stringify(result.services, null, 2),
+            },
+          ],
+        };
+      } catch (error: any) {
+        if (error.response?.status === 500) {
+          throw new Error(`Server error: ${error.response?.data?.message  || error.response?.data?.error || 'Internal server error occurred'}`);
+        }
+        // Re-throw other errors
+        throw error;
+      }
+    }
+  );
+
+  server.tool(
+    "ros_service_call",
+    "Call a ROS service with a request message",
+    {
+      service: z.string().min(1).max(100),
+      serviceType: z.string().min(1).max(1000),
+      request: z.object({}).passthrough(),
+    },
+    async ({ service, serviceType, request }) => {
+      try {
+        const result = await apiPost(`/ros/service_call`, {
+          service: service,
+          serviceType: serviceType,
+          message: request,
+        });
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
             },
           ],
         };
