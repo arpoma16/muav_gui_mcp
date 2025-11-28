@@ -6,8 +6,8 @@ import { registerCommandTools } from "./command.js";
 import { registerAGVCommandTools } from "./agvCommand.js";
 
 export function registerTools(server: McpServer) {
-  //registerRosTools(server);
-  //registerDevicesTools(server);
-  //registerCommandTools(server);
+  registerRosTools(server);
+  registerDevicesTools(server);
+  registerCommandTools(server);
   registerAGVCommandTools(server);
 }
