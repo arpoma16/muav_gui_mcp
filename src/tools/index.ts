@@ -4,10 +4,12 @@ import { registerRosTools } from "./ros.js";
 import { registerDevicesTools } from "./devices.js";
 import { registerCommandTools } from "./command.js";
 import { registerAGVCommandTools } from "./agvCommand.js";
+import { registerMissionTools } from "./missions.js";
 
 export function registerTools(server: McpServer) {
   registerRosTools(server);
   registerDevicesTools(server);
   registerCommandTools(server);
   registerAGVCommandTools(server);
+  registerMissionTools(server);
 }

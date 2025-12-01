@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 const WaypointSchema = z.object({
-  pos: z.tuple([z.number(), z.number(), z.number()]).describe("Position [latitude, longitude, altitude]"),
-  action: z.record(z.any()).describe("Actions to perform at waypoint")
+  pos: z.array(z.number()).length(3).describe("Position array [latitude, longitude, altitude in meters from ground]"),
+  action: z.record(z.any()).optional().default({}).describe("Optional actions to perform at waypoint (default: empty object)")
 });
 
 const RouteSchema = z.object({

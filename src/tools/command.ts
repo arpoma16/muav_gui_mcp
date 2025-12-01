@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { apiGet, apiPost } from "../utils.js";
+import { RouteSchema } from "../schemas/missions.js";
 
 export function registerCommandTools(server:McpServer){
   server.tool(
@@ -31,30 +32,17 @@ export function registerCommandTools(server:McpServer){
 
   // Tool: Load Mission
   server.tool(
-    "load_mission",
+    "load_mission_to_uav",
     "Load a mission to UAV devices",
     {
       deviceId: z
         .number()
         .describe("Device ID to load mission or -1 for all devices"),
-      routes: z
-        .array(
-          z.object({
-            id: z.string().describe("Route ID"),
-            waypoints: z
-              .array(
-                z.object({
-                  lat: z.number().describe("Latitude"),
-                  lng: z.number().describe("Longitude"),
-                  alt: z.number().describe("Altitude"),
-                })
-              )
-              .describe("Array of waypoints"),
-          })
-        )
-        .describe("Array of routes for the mission"),
+      routes: z.array(RouteSchema).describe("Array of routes"),
     },
     async ({ deviceId, routes }) => {
+      console.log("Loading mission for device:", deviceId);
+      console.log("Loading mission with routes:", routes);
       const result = await apiPost("/comands/send", {
         deviceId,
         type: "loadMission",
