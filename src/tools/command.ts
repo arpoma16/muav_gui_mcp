@@ -13,7 +13,7 @@ export function registerCommandTools(server:McpServer){
       attributes: z.any().describe("Attributes for the command"),
     },
     async ({ deviceId, type, attributes }) => {
-      const result = await apiPost("/comands/send", {
+      const result = await apiPost("/commands/send", {
         deviceId,
         type,
         attributes,
@@ -43,7 +43,7 @@ export function registerCommandTools(server:McpServer){
     async ({ deviceId, routes }) => {
       console.log("Loading mission for device:", deviceId);
       console.log("Loading mission with routes:", routes);
-      const result = await apiPost("/comands/send", {
+      const result = await apiPost("/commands/send", {
         deviceId,
         type: "loadMission",
         attributes: routes,
@@ -68,7 +68,7 @@ export function registerCommandTools(server:McpServer){
       deviceId: z.number().describe("Device ID or -1 for all devices"),
     },
     async ({ deviceId }) => {
-      const result = await apiPost("/comands/send", {
+      const result = await apiPost("/commands/send", {
         deviceId: deviceId,
         type: "commandMission",
       });
@@ -121,7 +121,7 @@ export function registerCommandTools(server:McpServer){
   //    },
   //  },
   //  async ({ deviceId, pitch, yaw, roll }) => {
-  //    const result = await apiPost("/comands/send", {
+  //    const result = await apiPost("/commands/send", {
   //      deviceId,
   //      type: "Gimbal",
   //      attributes: {
@@ -149,7 +149,7 @@ export function registerCommandTools(server:McpServer){
       deviceId: z.number().describe("Device ID to get commands for"),
     },
     async () => {
-      const commands = await apiGet("/comands/send");
+      const commands = await apiGet("/commands/send");
       return {
         content: [
           {

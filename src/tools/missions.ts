@@ -86,7 +86,7 @@ export function registerMissionTools(server: McpServer) {
           content: [
             {
               type: "text",
-              text: JSON.stringify(result, null, 2),
+              text: JSON.stringify({result, missionData}, null, 2),
             },
           ],
         };

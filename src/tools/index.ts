@@ -5,11 +5,14 @@ import { registerDevicesTools } from "./devices.js";
 import { registerCommandTools } from "./command.js";
 import { registerAGVCommandTools } from "./agvCommand.js";
 import { registerMissionTools } from "./missions.js";
-
+import { registerPositionsTools } from "./position.js";
+import { registerPlanningTools } from "./planning.js";
 export function registerTools(server: McpServer) {
-  registerRosTools(server);
+  //registerRosTools(server);
   registerDevicesTools(server);
   registerCommandTools(server);
-  registerAGVCommandTools(server);
+  //registerAGVCommandTools(server);
   registerMissionTools(server);
+  registerPlanningTools(server);
+  registerPositionsTools(server);
 }
