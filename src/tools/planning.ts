@@ -1,10 +1,10 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import { apiGet, apiPost } from "../utils.js";
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
+import { apiGet, apiPost } from '../utils.js';
 
 export function registerPlanningTools(server: McpServer) {
   server.tool(
-    "get_registered_objects",
+    'get_registered_objects',
     `Obtiene la lista completa de objetos/elementos registrados en el sistema con sus ubicaciones GPS (latitud, longitud).
     USA ESTA HERRAMIENTA CUANDO:
     - El usuario mencione elementos específicos por nombre (ej: "Torre A", "Transformador B", "Poste 123")
@@ -25,17 +25,60 @@ export function registerPlanningTools(server: McpServer) {
     - Calcular rutas o waypoints para inspección`,
     {},
     async () => {
-      const data = await apiGet("/planning/getMarkers");
+      const data = await apiGet('/planning/getMarkers');
 
       // Format as a readable summary
-      
+
       const summary = JSON.stringify(data, null, 2);
 
       return {
         content: [
           {
-            type: "text",
+            type: 'text',
             text: `Found ${data.length} data(s):\n\n${summary}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    'get_bases_with_assignments',
+    `Obtiene todas las bases de operaciones con sus posiciones GPS y los drones asignados a cada una.
+
+    USA ESTA HERRAMIENTA CUANDO:
+    - No tengas la posición actual de los drones
+    - No haya drones online o conectados al sistema
+    - Necesites saber desde dónde partirán los drones para crear una misión
+    - El usuario pregunte por las bases disponibles o los drones asignados
+    - Requieras calcular distancias o rutas desde las bases hasta los objetivos
+    - Necesites planificar una misión y no conozcas el punto de partida de los drones
+    - La herramienta get_drones_status devuelva una lista vacía o todos los drones estén offline
+
+    DEVUELVE:
+    - Lista de todas las bases con:
+      - id: identificador de la base
+      - latitude, longitude: coordenadas GPS de la base
+      - device: drone asignado (id, name) o null si no hay asignación
+
+    LLAMA ESTA HERRAMIENTA ANTES DE:
+    - Crear misiones cuando no tengas telemetría de posición de los drones
+    - Asignar drones a objetivos basándote en proximidad a las bases
+    - Calcular rutas óptimas desde bases hasta elementos a inspeccionar`,
+    {},
+    async () => {
+      const data = await apiGet('/planning/getBasesWithAssignments');
+
+      const basesWithDrones = data.filter((b: { device: unknown }) => b.device !== null);
+      const basesWithoutDrones = data.filter((b: { device: unknown }) => b.device === null);
+
+      const summary = JSON.stringify(data, null, 2);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Found ${data.length} base(s): ${basesWithDrones.length} with assigned drones, ${basesWithoutDrones.length} without assignment.\n\n${summary}`,
           },
         ],
       };

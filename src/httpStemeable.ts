@@ -44,6 +44,9 @@ export function httpStreamableSever(server: McpServer, port: number) {
           // Store the transport by session ID
           transports[sessionId] = transport;
         },
+        // Enable JSON responses instead of SSE streaming to avoid timeout issues
+        // with long-running tool calls
+        enableJsonResponse: true,
         // DNS rebinding protection is disabled by default for backwards compatibility. If you are running this server
         // locally, make sure to set:
         // enableDnsRebindingProtection: true,
@@ -79,7 +82,15 @@ export function httpStreamableSever(server: McpServer, port: number) {
     }
 
     // Handle the request
+    res.on("close", () => {
+      console.log(`[MCP-DEBUG] Response CLOSED for request id: ${req.body?.id}, method: ${req.body?.method}`);
+    });
+    res.on("finish", () => {
+      console.log(`[MCP-DEBUG] Response FINISHED for request id: ${req.body?.id}, method: ${req.body?.method}`);
+    });
+    console.log(`[MCP-DEBUG] Calling handleRequest for id: ${req.body?.id}`);
     await transport.handleRequest(req, res, req.body);
+    console.log(`[MCP-DEBUG] handleRequest returned for id: ${req.body?.id}`);
   });
 
   // Reusable handler for GET and DELETE requests
