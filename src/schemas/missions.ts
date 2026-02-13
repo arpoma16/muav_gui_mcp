@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { PositionXYZSchema, WaypointBaseSchema, RouteAttributesSchema, ObstacleSchema } from './common.js';
+import {
+  PositionXYZSchema,
+  WaypointBaseSchema,
+  RouteAttributesSchema,
+  ObstacleSchema,
+  OriginGlobalSchema,
+} from './common.js';
 
 // ============================================================================
 // Position schemas (mission-specific)
@@ -110,24 +116,6 @@ const MissionBaseSchema = {
   description: z.string().optional().describe('Mission description (optional)'),
 };
 
-const OriginGlobalSchema = z
-  .object({
-    lat: z
-      .number()
-      .refine((lat) => lat >= -90 && lat <= 90, {
-        message: 'Latitude must be between -90 and 90',
-      })
-      .describe('Origin latitude in decimal degrees'),
-    lng: z
-      .number()
-      .refine((lng) => lng >= -180 && lng <= 180, {
-        message: 'Longitude must be between -180 and 180',
-      })
-      .describe('Origin longitude in decimal degrees'),
-    alt: z.number().describe('Origin altitude in meters'),
-  })
-  .describe('Global origin for local XYZ coordinates');
-
 const MissionSchema = z.object({
   ...MissionBaseSchema,
   route: z.array(RouteSchema).describe('Array of routes'),
@@ -177,17 +165,29 @@ const DroneInformationSchema = z.object({
 
 const MissionRequirementsSchema = z
   .object({
-    mission_type: z.string().describe('Name of the type of mission to create '),
-    mission_strategy: z
+    mission_type: z
       .string()
-      .describe('Describe the strategy following EXACTLY the pattern from the inspection type.'),
+      .describe(
+        'Name of the type of mission ,e.g., simple inspection, circular  inspection, detailed inspection, etc..'
+      ),
+    mission_strategy: z.string().describe(
+      `The COMPLETE inspection strategy for the selected inspection type.
+Include ALL of the Strategy  and examples if provided
+DO NOT summarize. Copy the FULL strategy text.`
+    ),
   })
   .describe('Specific information about the mission requirements and objectives');
 
 const UserContextSchema = z
   .object({
     user_request: z.string().describe('The intent of the user request that led to this mission'),
-    additional_info: z.string().describe('Any additional relevant information about the user or request'),
+    additional_info: z
+      .string()
+      .describe(
+        'Additional context about UAVs, mission, or inspection targets not captured elsewhere. ' +
+          'Examples: specific flight constraints, weather conditions, time restrictions, ' +
+          'particular inspection requirements, or relevant element characteristics.'
+      ),
   })
   .describe('Contextual information about the user making the request');
 

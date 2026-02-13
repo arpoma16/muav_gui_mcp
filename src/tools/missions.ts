@@ -2,7 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { apiGet, apiPost } from '../utils.js';
 import { MissionSchema, MissionSchemaXYZ, filteredMissionSchema, validateMissionSchema } from '../schemas/missions.js';
 import { ValidateCollisionsInputSchema, ResolveCollisionsInputSchema } from '../schemas/collision.js';
-
+import { encode } from '@toon-format/toon';
 export function registerMissionTools(server: McpServer) {
   console.log('[MISSIONS] Registering mission tools...');
 
@@ -37,23 +37,23 @@ export function registerMissionTools(server: McpServer) {
     }
   );
 
-  server.tool(
-    'send_to_verification_chat',
-    `Only use if you have a mission plan with waypoints in  XYZ coordinates (meters).`,
-    validateMissionSchema,
-    async (args) => {
-      console.log('[send_to_verification_chat] Tool called with args:', args);
-      const result = await apiPost('/chat/verification_mission', { ...args });
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-      };
-    }
-  );
+  // server.tool(
+  //   'send_to_verification_chat',
+  //   `Only use if you have a mission plan with waypoints in  XYZ coordinates (meters).`,
+  //   validateMissionSchema,
+  //   async (args) => {
+  //     console.log('[send_to_verification_chat] Tool called with args:', args);
+  //     const result = await apiPost('/chat/verification_mission', { ...args });
+  //     return {
+  //       content: [
+  //         {
+  //           type: 'text',
+  //           text: JSON.stringify(result, null, 2),
+  //         },
+  //       ],
+  //     };
+  //   }
+  // );
 
   server.tool(
     'Show_mission_xyz_to_user',
@@ -221,8 +221,10 @@ export function registerMissionTools(server: McpServer) {
   server.tool(
     'validate_mission_collisions',
     `Validate a mission for collisions against obstacles WITHOUT modifying it.
-    use only for xyz missions.
+    Use only for xyz missions.
     Routes should never be separated into different tool requests.
+
+    IMPORTANT: All input data (names, descriptions, notes, metadata) MUST be provided in English.
 
     Use this tool to check if a mission's routes will collide with any obstacles in the environment.
     Returns detailed collision and warning information for each route.
@@ -245,7 +247,6 @@ export function registerMissionTools(server: McpServer) {
         "caution_zone": "cylinder: radius=25m, height=130m",
         "safe_zone": "beyond 30m radius"
       },
-      "safe_passages": ["approach from south at 80m altitude"],
       "aabb": {
         "min_point": {"x": 85, "y": 35, "z": 0},
         "max_point": {"x": 115, "y": 65, "z": 120}
@@ -255,14 +256,14 @@ export function registerMissionTools(server: McpServer) {
     async (args) => {
       console.log('[VALIDATE_COLLISIONS] Tool called');
       try {
-        const { mission, obstacles } = args;
-        const result = await apiPost('/missions/validate', { mission, obstacles });
+        const { mission, collision_objects } = args;
+        const result = await apiPost('/missions/validate', { mission, collision_objects });
         console.log('[VALIDATE_COLLISIONS] API returned, preparing response...');
         const response = {
           content: [
             {
               type: 'text',
-              text: JSON.stringify(result, null, 2),
+              text: encode(result),
             },
           ],
         };

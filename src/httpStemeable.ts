@@ -44,9 +44,6 @@ export function httpStreamableSever(server: McpServer, port: number) {
           // Store the transport by session ID
           transports[sessionId] = transport;
         },
-        // Enable JSON responses instead of SSE streaming to avoid timeout issues
-        // with long-running tool calls
-        enableJsonResponse: true,
         // DNS rebinding protection is disabled by default for backwards compatibility. If you are running this server
         // locally, make sure to set:
         // enableDnsRebindingProtection: true,

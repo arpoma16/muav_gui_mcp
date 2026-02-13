@@ -7,6 +7,7 @@ import {
   ObstacleSchema,
   ObstacleZonesSchema,
   AABBSchema,
+  OriginGlobalSchema,
 } from './common.js';
 
 // ============================================================================
@@ -44,6 +45,7 @@ const CollisionMissionSchema = z
     name: z.string().optional().describe('Mission name'),
     description: z.string().optional().describe('Mission description'),
     route: z.array(CollisionRouteSchema).describe('Array of routes to validate'),
+    origin_global: OriginGlobalSchema,
   })
   .describe('Mission data structure for collision validation');
 
@@ -53,12 +55,17 @@ const CollisionMissionSchema = z
 
 export const ValidateCollisionsInputSchema = {
   mission: CollisionMissionSchema.describe('Mission data with routes and waypoints to validate'),
-  obstacles: z.array(ObstacleSchema).describe('Array of obstacles to check for collisions'),
+  collision_objects: z
+    .array(ObstacleSchema)
+    .describe(
+      'All physical objects in the scene that require collision checking. ' +
+        'MUST include: (1) obstacles to avoid (buildings, trees, etc.), AND (2) inspection targets (turbines, panels, etc.) '
+    ),
 };
 
 export const ResolveCollisionsInputSchema = {
   mission: CollisionMissionSchema.describe('Mission data with routes and waypoints to validate and resolve'),
-  obstacles: z.array(ObstacleSchema).describe('Array of obstacles to check for collisions'),
+  collision_objects: z.array(ObstacleSchema).describe('Array of obstacles to check for collisions'),
 };
 
 // ============================================================================

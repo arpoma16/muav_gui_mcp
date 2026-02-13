@@ -12,10 +12,25 @@ export const PositionXYZSchema = z
   })
   .describe('Local position coordinates in meters');
 
-export const PositionArraySchema = z
-  .array(z.number())
-  .length(3)
-  .describe('Position array [x, y, z] in meters');
+export const PositionArraySchema = z.array(z.number()).length(3).describe('Position array [x, y, z] in meters');
+
+export const OriginGlobalSchema = z
+  .object({
+    lat: z
+      .number()
+      .refine((lat) => lat >= -90 && lat <= 90, {
+        message: 'Latitude must be between -90 and 90',
+      })
+      .describe('Origin latitude in decimal degrees'),
+    lng: z
+      .number()
+      .refine((lng) => lng >= -180 && lng <= 180, {
+        message: 'Longitude must be between -180 and 180',
+      })
+      .describe('Origin longitude in decimal degrees'),
+    alt: z.number().describe('Origin altitude in meters'),
+  })
+  .describe('Global origin for local XYZ coordinates');
 
 // ============================================================================
 // Waypoint Base Schema
@@ -77,7 +92,6 @@ export const ObstacleSchema = z
     type: z.string().describe('Obstacle type (e.g., "windTurbine", "building", "tree", "powerLine")'),
     position: PositionXYZSchema.describe('Center position of the obstacle'),
     zones: ObstacleZonesSchema,
-    safe_passages: z.array(z.string()).describe('List of pre-approved safe passages around the obstacle'),
     aabb: AABBSchema,
     metadata: z.string().optional().describe('Additional contextual information about the obstacle'),
   })
