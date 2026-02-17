@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { apiGet, apiPost } from '../utils.js';
-import { MissionSchema, MissionSchemaXYZ, filteredMissionSchema, validateMissionSchema } from '../schemas/missions.js';
+import { MissionSchema, MissionSchemaXYZ, filteredMissionSchema, markedStepSchema } from '../schemas/missions.js';
 import { ValidateCollisionsInputSchema, ResolveCollisionsInputSchema } from '../schemas/collision.js';
 import { encode } from '@toon-format/toon';
 export function registerMissionTools(server: McpServer) {
@@ -20,12 +20,55 @@ export function registerMissionTools(server: McpServer) {
   // });
 
   server.tool(
+    'mark_step_complete',
+    `You MUST use this to mark a logical mission step as completed 
+    when you dont need to use physical tools (such as check_collisions). 
+    This allows you to advance in the MISSION PLANNING STATUS.
+    You must briefly summarize your conclusion for this step.`,
+    markedStepSchema,
+    async (args) => {
+      console.log('[MARK_STEP_COMPLETE] Tool called with args:', args);
+      const { stepId, summary } = args;
+      console.log(`[MARK_STEP_COMPLETE] Step ${stepId} marked as complete with summary: ${summary}`);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `SUCCESS. Step ${stepId} marked as complete. You can now move to the next step.`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
     'create_mission',
     'Builds a UAV mission based on user requirements and context information.',
     filteredMissionSchema,
     async (args) => {
       console.log('[CREATE_MISSION_PLAN] Tool called with args:', args);
       const result = await apiPost('/chat/build_mission_plan_xyz', { ...args });
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    'complete_mission_requested',
+    `Only use if you have amission plan with waypoints in  XYZ coordinates (meters).
+    Returns the current mission plan in the required format. 
+    Use this to return the final mission plan once all steps are completed.`,
+    { missionDataXYZ: MissionSchemaXYZ.describe('Complete Mission data structure') },
+    async (args) => {
+      const { missionDataXYZ } = args;
+      console.log('[RETURN_MISSION_PLAN] Tool called with args:', args);
+      const result = await apiPost('/chat/return_mission_plan_xyz', { ...args });
       return {
         content: [
           {

@@ -238,4 +238,8 @@ const validateMissionSchema = {
     ),
 };
 
-export { MissionSchema, MissionSchemaXYZ, RouteSchema, filteredMissionSchema, validateMissionSchema };
+const markedStepSchema = {
+  stepId: z.string().describe('Identifier of the mission step being marked as complete (e.g., "STEP 3")'),
+  summary: z.string().describe('Brief summary of the conclusion or outcome for this step'),
+};
+export { MissionSchema, MissionSchemaXYZ, RouteSchema, filteredMissionSchema, validateMissionSchema, markedStepSchema };
