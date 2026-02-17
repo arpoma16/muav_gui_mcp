@@ -111,9 +111,8 @@ const DetailedRouteSchemaXYZ = z.object({
 // ============================================================================
 
 const MissionBaseSchema = {
-  version: z.string().describe('Mission format version'),
   name: z.string().describe('Mission name (short description of the mission)'),
-  description: z.string().optional().describe('Mission description (optional)'),
+  description: z.string().optional().describe('Mission description'),
 };
 
 const MissionSchema = z.object({
@@ -203,7 +202,6 @@ const obstacle_elements = z
         width_m: z.number().optional().describe('Width (if rectangular)'),
         length_m: z.number().optional().describe('Length (if rectangular)'),
       })
-      .optional()
       .describe('Physical dimensions for collision avoidance calculations'),
     metadata: z.string().optional().describe('Additional contextual information about the obstacle'),
   })

@@ -1,10 +1,18 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { apiGet, apiPost } from '../utils.js';
-import { MissionSchema, MissionSchemaXYZ, filteredMissionSchema, markedStepSchema } from '../schemas/missions.js';
-import { ValidateCollisionsInputSchema, ResolveCollisionsInputSchema } from '../schemas/collision.js';
-import { encode } from '@toon-format/toon';
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { apiGet, apiPost } from "../utils.js";
+import {
+  MissionSchema,
+  MissionSchemaXYZ,
+  filteredMissionSchema,
+  markedStepSchema,
+} from "../schemas/missions.js";
+import {
+  ValidateCollisionsInputSchema,
+  ResolveCollisionsInputSchema,
+} from "../schemas/collision.js";
+import { encode } from "@toon-format/toon";
 export function registerMissionTools(server: McpServer) {
-  console.log('[MISSIONS] Registering mission tools...');
+  console.log("[MISSIONS] Registering mission tools...");
 
   // server.tool('get_missions', 'get list of missions registered in the platform', {}, async () => {
   //   console.log('[GET_MISSIONS] Tool called');
@@ -20,64 +28,73 @@ export function registerMissionTools(server: McpServer) {
   // });
 
   server.tool(
-    'mark_step_complete',
-    `You MUST use this to mark a logical mission step as completed 
-    when you dont need to use physical tools (such as check_collisions). 
-    This allows you to advance in the MISSION PLANNING STATUS.
-    You must briefly summarize your conclusion for this step.`,
+    "mark_step_complete",
+    `Mark a logical mission-planning step as completed when no physical tool call is needed.
+    Advances the MISSION PLANNING STATUS to the next step.`,
     markedStepSchema,
     async (args) => {
-      console.log('[MARK_STEP_COMPLETE] Tool called with args:', args);
+      console.log("[MARK_STEP_COMPLETE] Tool called with args:", args);
       const { stepId, summary } = args;
-      console.log(`[MARK_STEP_COMPLETE] Step ${stepId} marked as complete with summary: ${summary}`);
+      console.log(
+        `[MARK_STEP_COMPLETE] Step ${stepId} marked as complete with summary: ${summary}`,
+      );
       return {
         content: [
           {
-            type: 'text',
+            type: "text",
             text: `SUCCESS. Step ${stepId} marked as complete. You can now move to the next step.`,
           },
         ],
       };
-    }
+    },
   );
 
   server.tool(
-    'create_mission',
-    'Builds a UAV mission based on user requirements and context information.',
+    "request_mission_plan",
+    `Submit pre-collected and filtered data to the mission planner sub-agent.
+    REQUIRES: target elements from get_registered_objects, drone info from get_devices/get_fleet_telemetry, and obstacle data.
+    Do NOT call this tool without first gathering all required data through the appropriate tools.
+    Returns a mission plan in local XYZ coordinates.`,
     filteredMissionSchema,
     async (args) => {
-      console.log('[CREATE_MISSION_PLAN] Tool called with args:', args);
-      const result = await apiPost('/chat/build_mission_plan_xyz', { ...args });
+      console.log("[CREATE_MISSION_PLAN] Tool called with args:", args);
+      const result = await apiPost("/chat/build_mission_plan_xyz", { ...args });
       return {
         content: [
           {
-            type: 'text',
+            type: "text",
             text: JSON.stringify(result, null, 2),
           },
         ],
       };
-    }
+    },
   );
 
   server.tool(
-    'complete_mission_requested',
-    `Only use if you have amission plan with waypoints in  XYZ coordinates (meters).
-    Returns the current mission plan in the required format. 
-    Use this to return the final mission plan once all steps are completed.`,
-    { missionDataXYZ: MissionSchemaXYZ.describe('Complete Mission data structure') },
+    "complete_mission",
+    `Submit the final XYZ mission plan after all planning steps are completed.
+    Requires a fully validated mission with waypoints in local XYZ coordinates (meters).`,
+    {
+      missionDataXYZ: MissionSchemaXYZ.describe(
+        "Complete Mission data structure",
+      ),
+    },
     async (args) => {
       const { missionDataXYZ } = args;
-      console.log('[RETURN_MISSION_PLAN] Tool called with args:', args);
-      const result = await apiPost('/chat/return_mission_plan_xyz', { ...args });
+      const missionWithVersion = { version: "3", ...missionDataXYZ };
+      console.log("[RETURN_MISSION_PLAN] Tool called with args:", args);
+      const result = await apiPost("/chat/return_mission_plan_xyz", {
+        missionDataXYZ: missionWithVersion,
+      });
       return {
         content: [
           {
-            type: 'text',
+            type: "text",
             text: JSON.stringify(result, null, 2),
           },
         ],
       };
-    }
+    },
   );
 
   // server.tool(
@@ -99,232 +116,155 @@ export function registerMissionTools(server: McpServer) {
   // );
 
   server.tool(
-    'Show_mission_xyz_to_user',
-    `Only use if you have amission plan with waypoints in  XYZ coordinates (meters).
-     Routes should never be separated into different missions. 
-
-
-      A mission consists of:
-      - version: mission format version (typically "3")
-      - name: mission name (can be a short description of the mission)
-      - description: detailed mission description
-      - route: array of routes, where each route contains:
-        * name: route name (can be a short description of the route)
-        * uav: UAV identifier (e.g., px4_3)
-        * id: route number (starting from 0)
-        * attributes: flight parameters (max_vel, idle_vel, mode_yaw, mode_gimbal, mode_trace, mode_landing)
-        * wp: waypoints array with pos [x,y,z] in meters and action objects
-        * uav_type: UAV type (e.g., px4_ros2, px4_sitl)
-
-      Example mission with 2 waypoints:
-      {
-        "version": "3",
-        "name": "Test mission",
-        "description": "This is a test mission with 2 waypoints.",
-        "route": [{
-          "name": "test_route",
-          "uav": "px4_3",
-          "id": 0,
-          "attributes": {
-            "max_vel": 12,
-            "idle_vel": 3,
-            "mode_yaw": 2,
-            "mode_gimbal": 0,
-            "mode_trace": 0,
-            "mode_landing": 2
-          },
-          "wp": [
-            {"pos": [10, 5.5, 5], "action": {}},
-            {"pos": [10, 5.5, 15], "action": {}}
-          ],
-          "uav_type": "px4_ros2"
-        }]
-      }`,
-    { missionDataXYZ: MissionSchemaXYZ.describe('Complete Mission data structure') },
+    "show_mission_xyz",
+    `Display an XYZ mission plan on the platform map for user review.
+    Waypoints must use local XYZ coordinates (meters). All routes belong in a single mission.`,
+    {
+      missionDataXYZ: MissionSchemaXYZ.describe(
+        "Complete Mission data structure",
+      ),
+    },
     async (args) => {
       try {
         const { missionDataXYZ } = args;
-        const result = await apiPost('/missions/showXYZ', missionDataXYZ);
+        const missionWithVersion = { version: "3", ...missionDataXYZ };
+        const result = await apiPost("/missions/showXYZ", missionWithVersion);
         return {
           content: [
             {
-              type: 'text',
+              type: "text",
               text: JSON.stringify({ result }, null, 2),
             },
           ],
         };
       } catch (error: any) {
-        console.error('Error:', error);
+        console.error("Error:", error);
 
         return {
           content: [
             {
-              type: 'text',
+              type: "text",
               text: `Error creating mission: ${error.message}`,
             },
           ],
           isError: true,
         };
       }
-    }
+    },
   );
 
   server.tool(
-    'Show_mission_to_user',
-    `Show and represent the mission on the platform.
-      IMPORTANT: You MUST call this tool to actually show the mission to the user once created.
-
-      A mission consists of:
-      - version: mission format version (typically "3")
-      - name: mission name (can be a short description of the mission)
-      - description: detailed mission description
-      - route: array of routes, where each route contains:
-        * name: route name (can be a short description of the route)
-        * uav: UAV identifier (e.g., px4_3)
-        * id: route number (starting from 0)
-        * attributes: flight parameters (max_vel, idle_vel, mode_yaw, mode_gimbal, mode_trace, mode_landing)
-        * wp: waypoints array with pos [lat, lon, alt] and action objects
-        * uav_type: UAV type (e.g., px4_ros2, px4_sitl)
-
-      Example mission with 2 waypoints:
-      {
-        "version": "3",
-        "name": "Test mission",
-        "description": "This is a test mission with 2 waypoints.",
-        "route": [{
-          "name": "test_route",
-          "uav": "px4_3",
-          "id": 0,
-          "attributes": {
-            "max_vel": 12,
-            "idle_vel": 3,
-            "mode_yaw": 2,
-            "mode_gimbal": 0,
-            "mode_trace": 0,
-            "mode_landing": 2
-          },
-          "wp": [
-            {"pos": [47.3978, 8.5461, 5], "action": {}},
-            {"pos": [47.3979, 8.5463, 5], "action": {}}
-          ],
-          "uav_type": "px4_ros2"
-        }]
-      }
-      Call this tool whenever the user requests to create, send, or execute a mission.`,
-    { missionData: MissionSchema.describe('Complete Mission data structure') },
+    "show_mission",
+    `Display a GPS mission plan on the platform map for user review.
+    Waypoints must use global coordinates [lat, lon, alt].
+    Call this after mission creation to visualize the result.`,
+    { missionData: MissionSchema.describe("Complete Mission data structure") },
     async (args) => {
-      console.log('\n\n=== CREATE_MISSION HANDLER STARTED ===');
-      console.log('Raw args:', args);
-      console.log('Args type:', typeof args);
-      console.log('Args keys:', Object.keys(args || {}));
+      console.log("\n\n=== CREATE_MISSION HANDLER STARTED ===");
+      console.log("Raw args:", args);
+      console.log("Args type:", typeof args);
+      console.log("Args keys:", Object.keys(args || {}));
 
       try {
         const { missionData } = args;
-        console.log('\n=== AFTER DESTRUCTURING ===');
-        console.log('Mission data received:', JSON.stringify(missionData, null, 2));
-        console.log('Type of missionData:', typeof missionData);
-        console.log('=================================\n');
+        const missionWithVersion = { version: "3", ...missionData };
+        console.log("\n=== AFTER DESTRUCTURING ===");
+        console.log(
+          "Mission data received:",
+          JSON.stringify(missionWithVersion, null, 2),
+        );
+        console.log("Type of missionData:", typeof missionData);
+        console.log("=================================\n");
 
-        const result = await apiPost('/missions/', missionData);
+        const result = await apiPost("/missions/", missionWithVersion);
 
         return {
           content: [
             {
-              type: 'text',
+              type: "text",
               text: JSON.stringify({ result, missionData }, null, 2),
             },
           ],
         };
       } catch (error: any) {
-        console.error('\n\n!!! ERROR IN CREATE_MISSION !!!');
-        console.error('Error:', error);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-        console.error('=================================\n');
+        console.error("\n\n!!! ERROR IN CREATE_MISSION !!!");
+        console.error("Error:", error);
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+        console.error("=================================\n");
 
         return {
           content: [
             {
-              type: 'text',
+              type: "text",
               text: `Error creating mission: ${error.message}`,
             },
           ],
           isError: true,
         };
       }
-    }
+    },
   );
 
-  console.log('[MISSIONS] Registered create_mission tool');
+  console.log("[MISSIONS] Registered request_mission_plan tool");
 
   // ============================================================================
   // Collision Detection Tools
   // ============================================================================
 
   server.tool(
-    'validate_mission_collisions',
-    `Validate a mission for collisions against obstacles WITHOUT modifying it.
-    Use only for xyz missions.
-    Routes should never be separated into different tool requests.
+    "validate_mission_collisions",
+    `Check an XYZ mission for collisions against obstacles without modifying it.
+    Send all routes in a single call. All input data must be in English.
 
-    IMPORTANT: All input data (names, descriptions, notes, metadata) MUST be provided in English.
+    Returns per-route collision and warning details:
+    - exclusion_zone hit → collision (mission invalid)
+    - caution_zone hit → warning only (mission still valid)
 
-    Use this tool to check if a mission's routes will collide with any obstacles in the environment.
-    Returns detailed collision and warning information for each route.
-
-    The validation checks:
-    - Waypoint positions against obstacle exclusion and caution zones
-    - Flight segments between consecutive waypoints for intersections
-
-    Zone types:
-    - exclusion_zone: Hard constraint, collision detected (mission invalid)
-    - caution_zone: Soft constraint, warning only (mission still valid)
-
-    Obstacle format example:
-    {
-      "name": "turbine_1",
-      "type": "windTurbine",
-      "position": {"x": 100, "y": 50, "z": 0},
-      "zones": {
-        "exclusion_zone": "cylinder: radius=15m, height=120m",
-        "caution_zone": "cylinder: radius=25m, height=130m",
-        "safe_zone": "beyond 30m radius"
-      },
-      "aabb": {
-        "min_point": {"x": 85, "y": 35, "z": 0},
-        "max_point": {"x": 115, "y": 65, "z": 120}
-      }
-    }`,
+    Checks waypoint positions and flight segments between consecutive waypoints.`,
     ValidateCollisionsInputSchema,
     async (args) => {
-      console.log('[VALIDATE_COLLISIONS] Tool called');
+      console.log("[VALIDATE_COLLISIONS] Tool called");
       try {
         const { mission, collision_objects } = args;
-        const result = await apiPost('/missions/validate', { mission, collision_objects });
-        console.log('[VALIDATE_COLLISIONS] API returned, preparing response...');
-        const response = {
-          content: [
-            {
-              type: 'text',
-              text: encode(result),
-            },
-          ],
+        const result = await apiPost("/missions/validate", {
+          mission,
+          collision_objects,
+        });
+        console.log(
+          "[VALIDATE_COLLISIONS] API returned, preparing response...",
+        );
+        const statusPrefix = result.valid
+          ? "✅ MISSION VALID: No collisions detected.\n\n"
+          : "❌ MISSION INVALID: Collisions detected. See details below:\n\n";
+
+        if (result.valid) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: statusPrefix + result.report,
+              },
+            ],
+          };
+        }
+        return {
+          content: [{ type: "text", text: statusPrefix + result.report }],
+          isError: true, // Esto disparará la lógica de "algo salió mal, debo arreglarlo" en el LLM
         };
-        console.log('[VALIDATE_COLLISIONS] Returning response to MCP');
-        return response;
       } catch (error: any) {
-        console.error('[VALIDATE_COLLISIONS] Error:', error);
+        console.error("[VALIDATE_COLLISIONS] Error:", error);
         return {
           content: [
             {
-              type: 'text',
+              type: "text",
               text: `Error validating mission collisions: ${error.message}`,
             },
           ],
           isError: true,
         };
       }
-    }
+    },
   );
 
   // server.tool(
@@ -391,6 +331,6 @@ export function registerMissionTools(server: McpServer) {
   //   }
   // );
 
-  console.log('[MISSIONS] Registered collision detection tools');
-  console.log('[MISSIONS] All mission tools registered successfully');
+  console.log("[MISSIONS] Registered collision detection tools");
+  console.log("[MISSIONS] All mission tools registered successfully");
 }

@@ -57,9 +57,9 @@ npm run dev:inspector
 | ------------- | --------------------------------------------------------------------------------------------- |
 | `devices.ts`  | `get_devices` - List registered robots                                                        |
 | `command.ts`  | `send_command`, `load_mission_to_uav`, `start_mission`, `get_available_commands`, `send_task` |
-| `missions.ts` | `get_missions`, `build_mission`, `create_mission`                                             |
+| `missions.ts` | `get_missions`, `build_mission`, `request_mission_plan`                                       |
 | `planning.ts` | `get_registered_objects` - Get GPS-located inspection elements                                |
-| `position.ts` | `get_telemetry_data` - Current robot positions/telemetry                                      |
+| `position.ts` | `get_fleet_telemetry` - Real-time UAV positions, battery, status                              |
 
 ### Schemas (`src/schemas/`)
 
