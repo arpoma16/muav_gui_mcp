@@ -235,8 +235,8 @@ export function registerMissionTools(server: McpServer) {
           "[VALIDATE_COLLISIONS] API returned, preparing response...",
         );
         const statusPrefix = result.valid
-          ? "✅ MISSION VALID: No collisions detected.\n\n"
-          : "❌ MISSION INVALID: Collisions detected. See details below:\n\n";
+          ? "✅ MISSION VALID: No collisions detected.\n"
+          : "❌ MISSION INVALID: Collisions detected. See details below:\n";
 
         if (result.valid) {
           return {
@@ -250,7 +250,10 @@ export function registerMissionTools(server: McpServer) {
         }
         return {
           content: [{ type: "text", text: statusPrefix + result.report }],
-          isError: true, // Esto disparará la lógica de "algo salió mal, debo arreglarlo" en el LLM
+          error: {
+            type: "MISSION_VALIDATION_ERROR",
+            message: "Collisions detected"  
+          },
         };
       } catch (error: any) {
         console.error("[VALIDATE_COLLISIONS] Error:", error);
