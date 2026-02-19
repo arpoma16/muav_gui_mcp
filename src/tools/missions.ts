@@ -214,14 +214,15 @@ export function registerMissionTools(server: McpServer) {
 
   server.tool(
     "validate_mission_collisions",
-    `Check an XYZ mission for collisions against obstacles without modifying it.
-    Send all routes in a single call. All input data must be in English.
-
-    Returns per-route collision and warning details:
-    - exclusion_zone hit → collision (mission invalid)
-    - caution_zone hit → warning only (mission still valid)
-
-    Checks waypoint positions and flight segments between consecutive waypoints.`,
+    `Critically validates a multi-route XYZ mission against a 3D obstacle database. 
+    Use this tool as a mandatory safety check before finalizing any flight plan.
+    
+    The tool detects:
+    1. HARD COLLISIONS: Physical intersections with obstacles (includes obstacle name, exact XYZ coordinates, and penetration depth in meters).
+    2. PROXIMITY WARNINGS: Safety buffer breaches.
+    
+    Input: Must contain all mission routes in a single batch.
+    Output: A detailed diagnostic report. If 'isError' is true, the mission MUST be rejected or recalculated based on the specific failing segments provided.`,
     ValidateCollisionsInputSchema,
     async (args) => {
       console.log("[VALIDATE_COLLISIONS] Tool called");
@@ -250,10 +251,6 @@ export function registerMissionTools(server: McpServer) {
         }
         return {
           content: [{ type: "text", text: statusPrefix + result.report }],
-          error: {
-            type: "MISSION_VALIDATION_ERROR",
-            message: "Collisions detected"  
-          },
         };
       } catch (error: any) {
         console.error("[VALIDATE_COLLISIONS] Error:", error);
