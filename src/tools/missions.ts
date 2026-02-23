@@ -238,19 +238,14 @@ export function registerMissionTools(server: McpServer) {
         const statusPrefix = result.valid
           ? "✅ MISSION VALID: No collisions detected.\n"
           : "❌ MISSION INVALID: Collisions detected. See details below:\n";
-
-        if (result.valid) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: statusPrefix + result.report,
-              },
-            ],
-          };
+        
+        let response  = {
+          valid: result.valid,
+          collisions: result.totalCollisions,
+          report: statusPrefix + result.report,
         }
         return {
-          content: [{ type: "text", text: statusPrefix + result.report }],
+          content: [{ type: "text", text: JSON.stringify(response, null, 2) }],
         };
       } catch (error: any) {
         console.error("[VALIDATE_COLLISIONS] Error:", error);
