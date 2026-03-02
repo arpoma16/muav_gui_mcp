@@ -45,7 +45,7 @@ const CollisionMissionSchema = z
     name: z.string().optional().describe('Mission name'),
     description: z.string().optional().describe('Mission description'),
     route: z.array(CollisionRouteSchema).describe('Array of routes to validate'),
-    origin_global: OriginGlobalSchema,
+    global_origin: OriginGlobalSchema,
   })
   .describe('Mission data structure for collision validation');
 

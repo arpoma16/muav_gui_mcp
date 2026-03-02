@@ -5,6 +5,7 @@ import {
   MissionSchemaXYZ,
   filteredMissionSchema,
   markedStepSchema,
+  completeMissionSchema,
 } from "../schemas/missions.js";
 import {
   ValidateCollisionsInputSchema,
@@ -54,7 +55,10 @@ export function registerMissionTools(server: McpServer) {
     `Submit pre-collected and filtered data to the mission planner sub-agent.
     REQUIRES: target elements from get_registered_objects, drone info from get_devices/get_fleet_telemetry, and obstacle data.
     Do NOT call this tool without first gathering all required data through the appropriate tools.
-    Returns a mission plan in local XYZ coordinates.`,
+    The mission planner will return a complete mission plan  suitable for visualization and ask  load to the UAV and start the mission execution. 
+    if don't return a valid mission plan, the planner will provide detailed feedback on what is missing or incorrect in the input data to guide you in correcting and resubmitting.
+    if returning  "planing mission start " or similar message, it means the planner has accepted the request and is working on generating the mission. You should wait for the next response which will contain the actual mission plan or any feedback if there are issues with the request. and not call the tool again until you receive that response.
+    `,
     filteredMissionSchema,
     async (args) => {
       console.log("[CREATE_MISSION_PLAN] Tool called with args:", args);
@@ -72,25 +76,22 @@ export function registerMissionTools(server: McpServer) {
 
   server.tool(
     "complete_mission",
-    `Submit the final XYZ mission plan after all planning steps are completed.
+    `Submit the  mission xyz create for the planner sub-agent.
     Requires a fully validated mission with waypoints in local XYZ coordinates (meters).`,
-    {
-      missionDataXYZ: MissionSchemaXYZ.describe(
-        "Complete Mission data structure",
-      ),
-    },
+      completeMissionSchema
+    ,
     async (args) => {
       const { missionDataXYZ } = args;
       const missionWithVersion = { version: "3", ...missionDataXYZ };
       console.log("[RETURN_MISSION_PLAN] Tool called with args:", args);
       const result = await apiPost("/chat/return_mission_plan_xyz", {
-        missionDataXYZ: missionWithVersion,
+        ...args, missionDataXYZ: missionWithVersion,
       });
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify(result, null, 2),
+            text: "OK Mission received and accepted. ",
           },
         ],
       };
@@ -154,7 +155,7 @@ export function registerMissionTools(server: McpServer) {
   );
 
   server.tool(
-    "show_mission",
+    "show_mission_to_user",
     `Display a GPS mission plan on the platform map for user review.
     Waypoints must use global coordinates [lat, lon, alt].
     Call this after mission creation to visualize the result.`,

@@ -122,8 +122,7 @@ const MissionSchema = z.object({
 
 const MissionSchemaXYZ = z.object({
   ...MissionBaseSchema,
-  origin_global: OriginGlobalSchema,
-  chat_id: z.string().describe('The chat identifier'),
+  global_origin: OriginGlobalSchema,
   route: z.array(RouteSchemaXYZ).describe('Array of routes'),
 });
 
@@ -159,7 +158,7 @@ const DroneInformationSchema = z.object({
   name: z.string().describe('Device identifier (e.g., px4_3)'),
   type: z.string().describe('Device category (e.g., px4_ros2, px4_sitl)'),
   location: GeoLocationSchema.describe('Location of the device'),
-  capabilities: z.record(z.any()).optional().describe('Additional drone capabilities or specifications'),
+  capabilities: z.object({batteryLevel: z.number().optional().describe('Battery level of the drone (0-100)'),}).optional().describe('Additional drone capabilities or specifications'),
 });
 
 const MissionRequirementsSchema = z
@@ -223,8 +222,15 @@ const filteredMissionSchema = {
   user_context: UserContextSchema,
 };
 
+const completeMissionSchema = {
+  chat_id: z.string().describe('The chat identifier'),
+  status: z.string().describe('valid, error, incomplete, etc.'),
+  description: z.string().describe('Summary the reason for the current status. If error, describe the error. If incomplete, describe what is missing. If valid, describe the main features of the mission.'),
+  missionDataXYZ: MissionSchemaXYZ.describe('Complete Mission data structure'),
+};
+
 const validateMissionSchema = {
-  origin_global: OriginGlobalSchema,
+  global_origin: OriginGlobalSchema,
   chat_id: z.string().describe('The chat identifier'),
   objectives: z.string().describe('Clear and concise list of mission objectives and goals'),
   route: z.array(DetailedRouteSchemaXYZ).describe('Array of routes'),
@@ -240,4 +246,4 @@ const markedStepSchema = {
   stepId: z.string().describe('Identifier of the mission step being marked as complete (e.g., "STEP 3")'),
   summary: z.string().describe('Brief summary of the conclusion or outcome for this step'),
 };
-export { MissionSchema, MissionSchemaXYZ, RouteSchema, filteredMissionSchema, validateMissionSchema, markedStepSchema };
+export {  completeMissionSchema, MissionSchema, MissionSchemaXYZ, RouteSchema, filteredMissionSchema, validateMissionSchema, markedStepSchema };
