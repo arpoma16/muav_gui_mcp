@@ -189,28 +189,29 @@ const UserContextSchema = z
   })
   .describe('Contextual information about the user making the request');
 
+
+
+const dimensionSchema = z.object({
+  height: z.number().describe('Total height of the obstacle'),
+  radius: z.number().optional().describe('Radius or half-width for cylindrical approximation'),
+  width: z.number().optional().describe('Width (if rectangular)'),
+  length: z.number().optional().describe('Length (if rectangular)'),
+}).describe('Physical dimensions of the object');
+
 const obstacle_elements = z
   .object({
     id: z.string().describe('Identifier of the obstacle element'),
     type: z.string().describe('Type of the element (e.g., building, tree, power line, etc.)'),
     position: GeoLocationSchema.describe('Position of the element'),
-    dimensions: z
-      .object({
-        height_m: z.number().optional().describe('Total height of the obstacle'),
-        radius_m: z.number().optional().describe('Radius or half-width for cylindrical approximation'),
-        width_m: z.number().optional().describe('Width (if rectangular)'),
-        length_m: z.number().optional().describe('Length (if rectangular)'),
-      })
-      .describe('Physical dimensions for collision avoidance calculations'),
+    dimensions: dimensionSchema,
     metadata: z.string().optional().describe('Additional contextual information about the obstacle'),
   })
-  .optional()
   .describe(
     'ALL other elements in the area that are NOT inspection targets. These are obstacles that must be avoided during flight. CRITICAL for collision avoidance and safe path planning.'
   );
 
 const filteredMissionSchema = {
-  chat_id: z.string().describe('The chat identifier'),
+  chat_id: z.string().describe('chat identifier'),
   target_elements: z.array(TargetElementSchema).describe('List of elements to inspect with all available information'),
   //group_information: z.array(GroupInformationSchema).describe('List of element types to consider for the mission'),
   obstacle_elements: z.array(obstacle_elements).describe('List of obstacle elements in the mission area'),
