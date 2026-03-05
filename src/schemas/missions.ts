@@ -214,7 +214,9 @@ const filteredMissionSchema = {
   chat_id: z.string().describe('chat identifier'),
   target_elements: z.array(TargetElementSchema).describe('List of elements to inspect with all available information'),
   //group_information: z.array(GroupInformationSchema).describe('List of element types to consider for the mission'),
-  obstacle_elements: z.array(obstacle_elements).describe('List of obstacle elements in the mission area'),
+  obstacle_elements: z.array(obstacle_elements).describe(
+    'ALL elements in the area that are NOT inspection targets. These are obstacles that must be avoided during flight. CRITICAL for collision avoidance and safe path planning.'
+  ),
   points_of_interest: z.array(z.object({})).describe('List of POI IDs to inspect given by the user'),
   drone_information: z
     .array(DroneInformationSchema)
