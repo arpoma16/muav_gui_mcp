@@ -120,6 +120,9 @@ const MissionSchema = z.object({
   route: z.array(RouteSchema).describe('Array of routes'),
 });
 
+const showMissionSchema = {
+  missionPlanid: z.number().describe('Identifier of the mission plan to show'),
+};
 const MissionSchemaXYZ = z.object({
   ...MissionBaseSchema,
   global_origin: OriginGlobalSchema,
@@ -226,7 +229,7 @@ const filteredMissionSchema = {
 };
 
 const completeMissionSchema = {
-  chat_id: z.string().describe('The chat identifier'),
+  chat_id: z.string().describe('The main chat identifier'),
   status: z.string().describe('valid, error, incomplete, etc.'),
   description: z.string().describe('Summary the reason for the current status. If error, describe the error. If incomplete, describe what is missing. If valid, describe the main features of the mission.'),
   missionDataXYZ: MissionSchemaXYZ.describe('Complete Mission data structure'),
@@ -249,4 +252,4 @@ const markedStepSchema = {
   stepId: z.string().describe('Identifier of the mission step being marked as complete (e.g., "STEP 3")'),
   summary: z.string().describe('Brief summary of the conclusion or outcome for this step'),
 };
-export {  completeMissionSchema, MissionSchema, MissionSchemaXYZ, RouteSchema, filteredMissionSchema, validateMissionSchema, markedStepSchema };
+export {  completeMissionSchema, MissionSchema, showMissionSchema,MissionSchemaXYZ, RouteSchema, filteredMissionSchema, validateMissionSchema, markedStepSchema };

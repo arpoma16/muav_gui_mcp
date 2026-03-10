@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { apiGet, apiPost } from "../utils.js";
-import { RouteSchema } from "../schemas/missions.js";
 
 export function registerCommandTools(server:McpServer){
   server.tool(
@@ -33,16 +32,27 @@ export function registerCommandTools(server:McpServer){
   // Tool: Load Mission
   server.tool(
     "load_mission_to_uav",
-    "Load a mission to UAV devices",
+    "Load a saved mission plan to UAV devices by its plan ID",
     {
       deviceId: z
         .number()
-        .describe("Device ID to load mission or -1 for all devices"),
-      routes: z.array(RouteSchema).describe("Array of routes"),
+        .describe("Device ID to load mission"),
+      missionPlanId: z.number().describe("Mission plan ID to load"),
     },
-    async ({ deviceId, routes }) => {
-      console.log("Loading mission for device:", deviceId);
-      console.log("Loading mission with routes:", routes);
+    async ({ deviceId, missionPlanId }) => {
+      console.log("Loading mission plan:", missionPlanId, "for device:", deviceId);
+
+      const plan = await apiGet(`/missions/plans/${missionPlanId}`);
+      if (!plan || !plan.missionData) {
+        return {
+          content: [{ type: "text", text: `Mission plan id ${missionPlanId}  , please check the plan ID and try again.` }],
+          isError: true,
+        };
+      }
+
+      const routes = plan.missionData.route ?? plan.missionData;
+      console.log("Loaded routes:", routes);
+
       const result = await apiPost("/commands/send", {
         deviceId,
         type: "loadMission",
@@ -65,7 +75,7 @@ export function registerCommandTools(server:McpServer){
     "start_mission",
     "send command start mission to UAV devices",
     {
-      deviceId: z.number().describe("Device ID or -1 for all devices"),
+      deviceId: z.number().describe("Device ID to start mission"),
     },
     async ({ deviceId }) => {
       const result = await apiPost("/commands/send", {
@@ -84,63 +94,6 @@ export function registerCommandTools(server:McpServer){
     }
   );
 
-    //
-  //// Tool: Control Gimbal
-  //server.registerTool(
-  //  "control_gimbal",
-  //  {
-  //    title: "Control Gimbal",
-  //    description: "Control the gimbal of a UAV device",
-  //    inputSchema: {
-  //      type: "object",
-  //      properties: {
-  //        deviceId: {
-  //          type: "number",
-  //          description: "Device ID or -1 for all devices",
-  //        },
-  //        pitch: {
-  //          type: "number",
-  //          minimum: -180,
-  //          maximum: 180,
-  //          description: "Pitch angle in degrees",
-  //        },
-  //        yaw: {
-  //          type: "number",
-  //          minimum: -180,
-  //          maximum: 180,
-  //          description: "Yaw angle in degrees",
-  //        },
-  //        roll: {
-  //          type: "number",
-  //          minimum: -180,
-  //          maximum: 180,
-  //          description: "Roll angle in degrees",
-  //        },
-  //      },
-  //      required: ["deviceId", "pitch", "yaw", "roll"],
-  //    },
-  //  },
-  //  async ({ deviceId, pitch, yaw, roll }) => {
-  //    const result = await apiPost("/commands/send", {
-  //      deviceId,
-  //      type: "Gimbal",
-  //      attributes: {
-  //        pitch,
-  //        yaw,
-  //        roll,
-  //      },
-  //    });
-  //    return {
-  //      content: [
-  //        {
-  //          type: "text",
-  //          text: JSON.stringify(result, null, 2),
-  //        },
-  //      ],
-  //    };
-  //  }
-  //);
-  //
   // Tool: Get Available Commands
   server.tool(
     "get_available_commands",

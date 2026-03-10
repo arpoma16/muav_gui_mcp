@@ -6,6 +6,7 @@ import {
   filteredMissionSchema,
   markedStepSchema,
   completeMissionSchema,
+  showMissionSchema
 } from "../schemas/missions.js";
 import {
   ValidateCollisionsInputSchema,
@@ -84,17 +85,20 @@ export function registerMissionTools(server: McpServer) {
       const { missionDataXYZ } = args;
       const missionWithVersion = { version: "3", ...missionDataXYZ };
       console.log("[RETURN_MISSION_PLAN] Tool called with args:", args);
-      const result = await apiPost("/chat/return_mission_plan_xyz", {
-        ...args, missionDataXYZ: missionWithVersion,
-      });
-      return {
-        content: [
-          {
-            type: "text",
-            text: "OK Mission received and accepted. ",
-          },
-        ],
-      };
+      try {
+        const result = await apiPost("/chat/return_mission_plan_xyz", {
+          ...args, missionDataXYZ: missionWithVersion,
+        });
+        return {
+          content: [{ type: "text", text: "OK Mission received and accepted." }],
+        };
+      } catch (error: any) {
+        const serverMessage = error?.response?.data?.error ?? error?.message ?? "Unknown error";
+        return {
+          content: [{ type: "text", text: `ERROR submitting mission: ${serverMessage}` }],
+          isError: true,
+        };
+      }
     },
   );
 
@@ -154,12 +158,65 @@ export function registerMissionTools(server: McpServer) {
     },
   );
 
+  // server.tool(
+  //   "show_mission_to_user",
+  //   `Display a GPS mission plan on the platform map for user review.
+  //   Waypoints must use global coordinates [lat, lon, alt].
+  //   Call this after mission creation to visualize the result.`,
+  //   { missionData: MissionSchema.describe("Complete Mission data structure") },
+  //   async (args) => {
+  //     console.log("\n\n=== CREATE_MISSION HANDLER STARTED ===");
+  //     console.log("Raw args:", args);
+  //     console.log("Args type:", typeof args);
+  //     console.log("Args keys:", Object.keys(args || {}));
+
+  //     try {
+  //       const { missionData } = args;
+  //       const missionWithVersion = { version: "3", ...missionData };
+  //       console.log("\n=== AFTER DESTRUCTURING ===");
+  //       console.log(
+  //         "Mission data received:",
+  //         JSON.stringify(missionWithVersion, null, 2),
+  //       );
+  //       console.log("Type of missionData:", typeof missionData);
+  //       console.log("=================================\n");
+
+  //       const result = await apiPost("/missions/", missionWithVersion);
+
+  //       return {
+  //         content: [
+  //           {
+  //             type: "text",
+  //             text: JSON.stringify({ result, description: "Mission showed successfully" }, null, 2),
+  //           },
+  //         ],
+  //       };
+  //     } catch (error: any) {
+  //       console.error("\n\n!!! ERROR IN CREATE_MISSION !!!");
+  //       console.error("Error:", error);
+  //       console.error("Error message:", error.message);
+  //       console.error("Error stack:", error.stack);
+  //       console.error("=================================\n");
+
+  //       return {
+  //         content: [
+  //           {
+  //             type: "text",
+  //             text: `Error creating mission: ${error.message}`,
+  //           },
+  //         ],
+  //         isError: true,
+  //       };
+  //     }
+  //   },
+  // );
+
+
   server.tool(
     "show_mission_to_user",
-    `Display a GPS mission plan on the platform map for user review.
-    Waypoints must use global coordinates [lat, lon, alt].
+    `Display a GPS mission plan.
     Call this after mission creation to visualize the result.`,
-    { missionData: MissionSchema.describe("Complete Mission data structure") },
+    showMissionSchema,
     async (args) => {
       console.log("\n\n=== CREATE_MISSION HANDLER STARTED ===");
       console.log("Raw args:", args);
@@ -167,17 +224,10 @@ export function registerMissionTools(server: McpServer) {
       console.log("Args keys:", Object.keys(args || {}));
 
       try {
-        const { missionData } = args;
-        const missionWithVersion = { version: "3", ...missionData };
-        console.log("\n=== AFTER DESTRUCTURING ===");
-        console.log(
-          "Mission data received:",
-          JSON.stringify(missionWithVersion, null, 2),
-        );
-        console.log("Type of missionData:", typeof missionData);
-        console.log("=================================\n");
+        const { missionPlanid } = args;
 
-        const result = await apiPost("/missions/", missionWithVersion);
+
+        const result = await apiGet(`/missions/plans/show/${missionPlanid}`);
 
         return {
           content: [
