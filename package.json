@@ -17,7 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.21.2",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@toon-format/toon": "^2.1.0",
     "axios": "^1.10.0",
     "dotenv": "^17.2.0",
@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@cfworker/json-schema": "^4.1.1",
-    "@modelcontextprotocol/inspector": "^0.17.2",
+    "@modelcontextprotocol/inspector": "^0.17.5",
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.10",
     "nodemon": "^3.1.9",
