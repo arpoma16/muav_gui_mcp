@@ -8,7 +8,7 @@ export function registerPlanningTools(server: McpServer) {
     `Returns all registered objects/elements in the system with their GPS coordinates (latitude, longitude), type, and additional attributes. Use before creating inspection missions for named elements or when the user asks about available objects.`,
     {},
     async () => {
-      const data = await apiGet('/planning/getMarkers');
+      const data = await apiGet('/markers');
 
       // Format as a readable summary
 
@@ -30,7 +30,7 @@ export function registerPlanningTools(server: McpServer) {
     `Returns all operation bases with their GPS positions and assigned drones. Each base includes id, coordinates, and assigned device (or null). Use when drone positions are unknown, drones are offline, or you need departure points for mission planning.`,
     {},
     async () => {
-      const data = await apiGet('/planning/getBasesWithAssignments');
+      const data = await apiGet('markers/bases/assigned');
 
       const basesWithDrones = data.filter((b: { device: unknown }) => b.device !== null);
       const basesWithoutDrones = data.filter((b: { device: unknown }) => b.device === null);

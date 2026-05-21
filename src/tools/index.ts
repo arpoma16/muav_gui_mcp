@@ -11,7 +11,7 @@ export function registerTools(server: McpServer) {
   //registerRosTools(server);
   registerDevicesTools(server);
   registerCommandTools(server);
-  //registerAGVCommandTools(server);
+  registerAGVCommandTools(server);
   registerMissionTools(server);
   registerPlanningTools(server);
   registerPositionsTools(server);
