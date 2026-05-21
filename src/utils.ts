@@ -22,11 +22,11 @@ async function apiPost(path: string, data: any) {
   }
 }
 
-async function apiGet(path: string, params: any = {}) {
+async function apiGet(path: string, params: any = {}, timeout?: number) {
   try {
     const res = await axios.get(`${config.BASE_URL}${path}`, {
       params,
-      timeout: config.REQUEST_TIMEOUT,
+      timeout: timeout ?? config.REQUEST_TIMEOUT,
       headers: config.API_TOKEN ? { Authorization: config.API_TOKEN } : {},
     });
     console.log("API GET Response:", res.status, res.statusText);
@@ -36,10 +36,33 @@ async function apiGet(path: string, params: any = {}) {
       status: error.response?.status,
       message: error.response?.data?.message || error.message,
       path,
-      params
+      params,
     });
     throw error;
   }
 }
 
-export { apiPost, apiGet };
+async function apiGetBinary(path: string, params: any = {}) {
+  try {
+    const res = await axios.get(`${config.BASE_URL}${path}`, {
+      params,
+      responseType: "arraybuffer",
+      timeout: config.REQUEST_TIMEOUT,
+      headers: config.API_TOKEN ? { Authorization: config.API_TOKEN } : {},
+    });
+    console.log("API GET Binary Response:", res.status, res.statusText);
+    return {
+      data: Buffer.from(res.data).toString("base64"),
+      mimeType: res.headers["content-type"],
+    };
+  } catch (error: any) {
+    console.error("API GET Binary Error:", {
+      status: error.response?.status,
+      message: error.message,
+      path,
+    });
+    throw error;
+  }
+}
+
+export { apiPost, apiGet, apiGetBinary };
