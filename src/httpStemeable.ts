@@ -5,8 +5,9 @@ import cors from "cors";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
+import { createServer } from "./server.js";
 
-export function httpStreamableSever(server: McpServer, port: number) {
+export function httpStreamableSever(_unused: McpServer, port: number) {
   const app = express();
   app.use(express.json());
 
@@ -20,8 +21,9 @@ export function httpStreamableSever(server: McpServer, port: number) {
   //  })
   //);
 
-  // Map to store transports by session ID
+  // Map to store transports and servers by session ID
   const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
+  const servers: { [sessionId: string]: McpServer } = {};
 
   // Handle POST requests for client-to-server communication
   app.post("/mcp", async (req, res) => {
@@ -50,21 +52,18 @@ export function httpStreamableSever(server: McpServer, port: number) {
         // allowedHosts: ['127.0.0.1'],
       });
 
-      // Clean up transport when closed
+      // Clean up transport and server when closed
       transport.onclose = () => {
         if (transport.sessionId) {
           delete transports[transport.sessionId];
+          delete servers[transport.sessionId];
         }
       };
-      //const server = new McpServer({
-      //  name: "example-server",
-      //  version: "1.0.0"
-      //});
 
-      // ... set up server resources, tools, and prompts ...
+      const sessionServer = createServer();
 
       // Connect to the MCP server
-      await server.connect(transport);
+      await sessionServer.connect(transport);
     } else {
       // Invalid request
       res.status(400).json({
