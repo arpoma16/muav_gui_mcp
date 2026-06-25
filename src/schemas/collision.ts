@@ -16,7 +16,10 @@ import {
 
 const CollisionWaypointSchema = z.object({
   type: z.enum(['inspection', 'transit', 'takeoff', 'landing']).describe('Type of waypoint'),
-  target_id: z.string().optional().describe('Identifier of the target element (required for inspection waypoints)'),
+  target_id: z
+    .string()
+    .optional()
+    .describe('Identifier of the target element (required for inspection waypoints)'),
   notes: z.string().optional().describe('Additional notes for this waypoint'),
   pos: PositionArraySchema.or(PositionXYZSchema).describe('Position in local XYZ coordinates'),
   ...WaypointBaseSchema,
@@ -64,7 +67,9 @@ export const ValidateCollisionsInputSchema = {
 };
 
 export const ResolveCollisionsInputSchema = {
-  mission: CollisionMissionSchema.describe('Mission data with routes and waypoints to validate and resolve'),
+  mission: CollisionMissionSchema.describe(
+    'Mission data with routes and waypoints to validate and resolve'
+  ),
   collision_objects: z.array(ObstacleSchema).describe('Array of obstacles to check for collisions'),
 };
 

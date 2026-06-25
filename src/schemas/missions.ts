@@ -14,13 +14,13 @@ import {
 const PositionGlobalSchema = z
   .array(z.number())
   .length(3)
-  .refine((coords) => coords[0] >= -90 && coords[0] <= 90, {
+  .refine(coords => coords[0] >= -90 && coords[0] <= 90, {
     message: 'Latitude must be between -90 and 90',
   })
-  .refine((coords) => coords[1] >= -180 && coords[1] <= 180, {
+  .refine(coords => coords[1] >= -180 && coords[1] <= 180, {
     message: 'Longitude must be between -180 and 180',
   })
-  .refine((coords) => coords[2] >= 0, {
+  .refine(coords => coords[2] >= 0, {
     message: 'Altitude must be non-negative',
   })
   .describe('Position array [latitude, longitude, altitude in meters from ground]');
@@ -36,7 +36,7 @@ const GeoLocationSchema = z
 const PositionLocalSchema = z
   .array(z.number())
   .length(3)
-  .refine((coords) => coords[2] >= 0, {
+  .refine(coords => coords[2] >= 0, {
     message: 'Altitude must be non-negative',
   })
   .describe('Position array [x, y, z in meters x+East, y+North, z+Up]');
@@ -63,7 +63,9 @@ const DetailedWaypointSchemaXYZ = z
     target_id: z
       .string()
       .optional()
-      .describe('Identifier of the target element associated with this waypoint (required for inspection waypoints)'),
+      .describe(
+        'Identifier of the target element associated with this waypoint (required for inspection waypoints)'
+      ),
     notes: z.string().optional().describe('Additional notes or instructions for this waypoint'),
     pos: PositionXYZSchema,
     ...WaypointBaseSchema,
@@ -135,7 +137,9 @@ const MissionSchemaXYZ = z.object({
 
 const TargetElementSchema = z.object({
   name: z.string().describe('Name of the element to inspect'),
-  type: z.string().describe('Type of the element to inspect (e.g., wind turbine, solar panel, etc.)'),
+  type: z
+    .string()
+    .describe('Type of the element to inspect (e.g., wind turbine, solar panel, etc.)'),
   group_name: z.string().describe('Group or category the element belongs to'),
   position: GeoLocationSchema.describe('Position of the element'),
   characteristics: z
@@ -161,7 +165,10 @@ const DroneInformationSchema = z.object({
   name: z.string().describe('Device identifier (e.g., px4_3)'),
   type: z.string().describe('Device category (e.g., px4_ros2, px4_sitl)'),
   location: GeoLocationSchema.describe('Location of the device'),
-  capabilities: z.object({batteryLevel: z.number().optional().describe('Battery level of the drone (0-100)'),}).optional().describe('Additional drone capabilities or specifications'),
+  capabilities: z
+    .object({ batteryLevel: z.number().optional().describe('Battery level of the drone (0-100)') })
+    .optional()
+    .describe('Additional drone capabilities or specifications'),
 });
 
 const MissionRequirementsSchema = z
@@ -192,14 +199,14 @@ const UserContextSchema = z
   })
   .describe('Contextual information about the user making the request');
 
-
-
-const dimensionSchema = z.object({
-  height: z.number().describe('Total height of the obstacle'),
-  radius: z.number().optional().describe('Radius or half-width for cylindrical approximation'),
-  width: z.number().optional().describe('Width (if rectangular)'),
-  length: z.number().optional().describe('Length (if rectangular)'),
-}).describe('Physical dimensions of the object');
+const dimensionSchema = z
+  .object({
+    height: z.number().describe('Total height of the obstacle'),
+    radius: z.number().optional().describe('Radius or half-width for cylindrical approximation'),
+    width: z.number().optional().describe('Width (if rectangular)'),
+    length: z.number().optional().describe('Length (if rectangular)'),
+  })
+  .describe('Physical dimensions of the object');
 
 const obstacle_elements = z
   .object({
@@ -207,7 +214,10 @@ const obstacle_elements = z
     type: z.string().describe('Type of the element (e.g., building, tree, power line, etc.)'),
     position: GeoLocationSchema.describe('Position of the element'),
     dimensions: dimensionSchema,
-    metadata: z.string().optional().describe('Additional contextual information about the obstacle'),
+    metadata: z
+      .string()
+      .optional()
+      .describe('Additional contextual information about the obstacle'),
   })
   .describe(
     'ALL other elements in the area that are NOT inspection targets. These are obstacles that must be avoided during flight. CRITICAL for collision avoidance and safe path planning.'
@@ -215,12 +225,18 @@ const obstacle_elements = z
 
 const filteredMissionSchema = {
   chat_id: z.string().describe('chat identifier'),
-  target_elements: z.array(TargetElementSchema).describe('List of elements to inspect with all available information'),
+  target_elements: z
+    .array(TargetElementSchema)
+    .describe('List of elements to inspect with all available information'),
   //group_information: z.array(GroupInformationSchema).describe('List of element types to consider for the mission'),
-  obstacle_elements: z.array(obstacle_elements).describe(
-    'ALL elements in the area that are NOT inspection targets. These are obstacles that must be avoided during flight. CRITICAL for collision avoidance and safe path planning.'
-  ),
-  points_of_interest: z.array(z.object({})).describe('List of POI IDs to inspect given by the user'),
+  obstacle_elements: z
+    .array(obstacle_elements)
+    .describe(
+      'ALL elements in the area that are NOT inspection targets. These are obstacles that must be avoided during flight. CRITICAL for collision avoidance and safe path planning.'
+    ),
+  points_of_interest: z
+    .array(z.object({}))
+    .describe('List of POI IDs to inspect given by the user'),
   drone_information: z
     .array(DroneInformationSchema)
     .describe('Complete information about the drone that will execute the mission'),
@@ -231,7 +247,11 @@ const filteredMissionSchema = {
 const completeMissionSchema = {
   chat_id: z.string().describe('The main chat identifier'),
   status: z.string().describe('valid, error, incomplete, etc.'),
-  description: z.string().describe('Summary the reason for the current status. If error, describe the error. If incomplete, describe what is missing. If valid, describe the main features of the mission.'),
+  description: z
+    .string()
+    .describe(
+      'Summary the reason for the current status. If error, describe the error. If incomplete, describe what is missing. If valid, describe the main features of the mission.'
+    ),
   missionDataXYZ: MissionSchemaXYZ.describe('Complete Mission data structure'),
 };
 
@@ -249,7 +269,18 @@ const validateMissionSchema = {
 };
 
 const markedStepSchema = {
-  stepId: z.string().describe('Identifier of the mission step being marked as complete (e.g., "STEP 3")'),
+  stepId: z
+    .string()
+    .describe('Identifier of the mission step being marked as complete (e.g., "STEP 3")'),
   summary: z.string().describe('Brief summary of the conclusion or outcome for this step'),
 };
-export {  completeMissionSchema, MissionSchema, showMissionSchema,MissionSchemaXYZ, RouteSchema, filteredMissionSchema, validateMissionSchema, markedStepSchema };
+export {
+  completeMissionSchema,
+  MissionSchema,
+  showMissionSchema,
+  MissionSchemaXYZ,
+  RouteSchema,
+  filteredMissionSchema,
+  validateMissionSchema,
+  markedStepSchema,
+};

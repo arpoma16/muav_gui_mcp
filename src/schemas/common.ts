@@ -12,19 +12,22 @@ export const PositionXYZSchema = z
   })
   .describe('Local position coordinates in meters');
 
-export const PositionArraySchema = z.array(z.number()).length(3).describe('Position array [x, y, z] in meters');
+export const PositionArraySchema = z
+  .array(z.number())
+  .length(3)
+  .describe('Position array [x, y, z] in meters');
 
 export const OriginGlobalSchema = z
   .object({
     lat: z
       .number()
-      .refine((lat) => lat >= -90 && lat <= 90, {
+      .refine(lat => lat >= -90 && lat <= 90, {
         message: 'Latitude must be between -90 and 90',
       })
       .describe('Origin latitude in decimal degrees'),
     lng: z
       .number()
-      .refine((lng) => lng >= -180 && lng <= 180, {
+      .refine(lng => lng >= -180 && lng <= 180, {
         message: 'Longitude must be between -180 and 180',
       })
       .describe('Origin longitude in decimal degrees'),
@@ -60,7 +63,9 @@ export const RouteAttributesSchema = z
   .object({
     max_vel: z.number().describe('Maximum velocity in m/s'),
     idle_vel: z.number().describe('Idle velocity in m/s'),
-    mode_yaw: z.number().describe('Yaw mode (0-3). 0: Auto, 1: lock, 2: RC control, 3: waypoint yaw control heading'),
+    mode_yaw: z
+      .number()
+      .describe('Yaw mode (0-3). 0: Auto, 1: lock, 2: RC control, 3: waypoint yaw control heading'),
     mode_gimbal: z.number().describe('Gimbal mode (0-2)'),
     mode_trace: z.number().describe('Trace mode (0-2)'),
     mode_landing: z.number().describe('Landing mode (0-2)'),
@@ -73,8 +78,12 @@ export const RouteAttributesSchema = z
 
 export const ObstacleZonesSchema = z
   .object({
-    exclusion_zone: z.string().describe('Exclusion zone description (e.g., "cylinder: radius=15m, height=120m")'),
-    caution_zone: z.string().describe('Caution zone description (e.g., "cylinder: radius=25m, height=130m")'),
+    exclusion_zone: z
+      .string()
+      .describe('Exclusion zone description (e.g., "cylinder: radius=15m, height=120m")'),
+    caution_zone: z
+      .string()
+      .describe('Caution zone description (e.g., "cylinder: radius=25m, height=130m")'),
     safe_zone: z.string().describe('Safe zone description (e.g., "beyond 30m radius")'),
   })
   .describe('Zone definitions around the obstacle');
@@ -89,10 +98,15 @@ export const AABBSchema = z
 export const ObstacleSchema = z
   .object({
     name: z.string().describe('Obstacle identifier (e.g., "turbine_1", "building_A")'),
-    type: z.string().describe('Obstacle type (e.g., "windTurbine", "building", "tree", "powerLine")'),
+    type: z
+      .string()
+      .describe('Obstacle type (e.g., "windTurbine", "building", "tree", "powerLine")'),
     position: PositionXYZSchema.describe('Center position of the obstacle'),
     zones: ObstacleZonesSchema,
     aabb: AABBSchema,
-    metadata: z.string().optional().describe('Additional contextual information about the obstacle'),
+    metadata: z
+      .string()
+      .optional()
+      .describe('Additional contextual information about the obstacle'),
   })
   .describe('Obstacle definition for collision detection');
