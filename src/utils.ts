@@ -1,22 +1,23 @@
-import axios from "axios";
-import { config } from "./config.js";
+import axios from 'axios';
+import { config } from './config.js';
 // Helper to call the multiuav_gui API
-async function apiPost(path: string, data: any) {
+async function apiPost(path: string, data: any, timeout?: number) {
   try {
-    console.log("API POST", path, data);
+    console.log('API POST', path, data);
     const res = await axios.post(`${config.BASE_URL}${path}`, data, {
-      timeout: config.REQUEST_TIMEOUT,
+      timeout: timeout ?? config.REQUEST_TIMEOUT,
       headers: config.API_TOKEN
         ? { Authorization: config.API_TOKEN }
-        : { "Content-Type": "application/json" },
+        : { 'Content-Type': 'application/json' },
     });
-    console.log("API POST Response:", res.status, res.statusText);
+    console.log('API POST Response:', res.status, res.statusText);
     return res.data;
   } catch (error: any) {
-    console.error("API POST Error:", {
+    const serverMessage = error.response?.data?.error ?? error.message;
+    console.error('API POST Error:', {
       status: error.response?.status,
-      message: error.response?.data?.message || error.message,
-      path
+      message: serverMessage,
+      path,
     });
     throw error;
   }
@@ -29,10 +30,10 @@ async function apiGet(path: string, params: any = {}, timeout?: number) {
       timeout: timeout ?? config.REQUEST_TIMEOUT,
       headers: config.API_TOKEN ? { Authorization: config.API_TOKEN } : {},
     });
-    console.log("API GET Response:", res.status, res.statusText);
+    console.log('API GET Response:', res.status, res.statusText);
     return res.data;
   } catch (error: any) {
-    console.error("API GET Error:", {
+    console.error('API GET Error:', {
       status: error.response?.status,
       message: error.response?.data?.message || error.message,
       path,
@@ -46,17 +47,17 @@ async function apiGetBinary(path: string, params: any = {}) {
   try {
     const res = await axios.get(`${config.BASE_URL}${path}`, {
       params,
-      responseType: "arraybuffer",
+      responseType: 'arraybuffer',
       timeout: config.REQUEST_TIMEOUT,
       headers: config.API_TOKEN ? { Authorization: config.API_TOKEN } : {},
     });
-    console.log("API GET Binary Response:", res.status, res.statusText);
+    console.log('API GET Binary Response:', res.status, res.statusText);
     return {
-      data: Buffer.from(res.data).toString("base64"),
-      mimeType: res.headers["content-type"],
+      data: Buffer.from(res.data).toString('base64'),
+      mimeType: res.headers['content-type'],
     };
   } catch (error: any) {
-    console.error("API GET Binary Error:", {
+    console.error('API GET Binary Error:', {
       status: error.response?.status,
       message: error.message,
       path,
