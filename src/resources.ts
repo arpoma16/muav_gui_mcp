@@ -1,25 +1,22 @@
-import {
-  McpServer,
-  ResourceTemplate,
-} from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-import { apiGet } from "./utils.js";
+import { apiGet } from './utils.js';
 
 export function registerResources(server: McpServer) {
   // Resource: List of Devices
   server.registerResource(
-    "devices",
-    "devices://all",
+    'devices',
+    'devices://all',
     {
-      title: "UAV Devices",
-      description: "List of all UAV devices",
+      title: 'UAV Devices',
+      description: 'List of all UAV devices',
     },
     async () => {
-      const devices = await apiGet("/devices");
+      const devices = await apiGet('/devices');
       return {
         contents: [
           {
-            uri: "devices://all",
+            uri: 'devices://all',
             text: JSON.stringify(devices, null, 2),
           },
         ],
@@ -29,14 +26,14 @@ export function registerResources(server: McpServer) {
 
   // Resource: Device by ID
   server.registerResource(
-    "device",
-    new ResourceTemplate("device://{id}", { list: undefined }),
+    'device',
+    new ResourceTemplate('device://{id}', { list: undefined }),
     {
-      title: "Device Info",
-      description: "Information for a specific UAV device",
+      title: 'Device Info',
+      description: 'Information for a specific UAV device',
     },
     async (uri, { id }) => {
-      const devices = await apiGet("/devices", { id });
+      const devices = await apiGet('/devices', { id });
       return {
         contents: [
           {
@@ -50,18 +47,18 @@ export function registerResources(server: McpServer) {
 
   // Resource: Positions
   server.registerResource(
-    "positions",
-    "positions://all",
+    'positions',
+    'positions://all',
     {
-      title: "UAV Positions",
-      description: "Current positions of all UAV devices",
+      title: 'UAV Positions',
+      description: 'Current positions of all UAV devices',
     },
     async () => {
-      const positions = await apiGet("/positions");
+      const positions = await apiGet('/positions');
       return {
         contents: [
           {
-            uri: "positions://all",
+            uri: 'positions://all',
             text: JSON.stringify(positions, null, 2),
           },
         ],
@@ -71,14 +68,14 @@ export function registerResources(server: McpServer) {
 
   // Resource: Position by Device ID
   server.registerResource(
-    "position",
-    new ResourceTemplate("position://{deviceId}", { list: undefined }),
+    'position',
+    new ResourceTemplate('position://{deviceId}', { list: undefined }),
     {
-      title: "Device Position",
-      description: "Current position of a specific UAV device",
+      title: 'Device Position',
+      description: 'Current position of a specific UAV device',
     },
     async (uri, { deviceId }) => {
-      const positions = await apiGet("/positions", { deviceId });
+      const positions = await apiGet('/positions', { deviceId });
       return {
         contents: [
           {
@@ -92,18 +89,18 @@ export function registerResources(server: McpServer) {
 
   // Resource: Missions
   server.registerResource(
-    "missions",
-    "missions://all",
+    'missions',
+    'missions://all',
     {
-      title: "Missions",
-      description: "List of all missions",
+      title: 'Missions',
+      description: 'List of all missions',
     },
     async () => {
-      const missions = await apiGet("/missions/");
+      const missions = await apiGet('/missions/');
       return {
         contents: [
           {
-            uri: "missions://all",
+            uri: 'missions://all',
             text: JSON.stringify(missions, null, 2),
           },
         ],
@@ -113,14 +110,14 @@ export function registerResources(server: McpServer) {
 
   // Resource: Mission Routes
   server.registerResource(
-    "routes",
-    new ResourceTemplate("routes://{missionId}", { list: undefined }),
+    'routes',
+    new ResourceTemplate('routes://{missionId}', { list: undefined }),
     {
-      title: "Mission Routes",
-      description: "Routes for a specific mission",
+      title: 'Mission Routes',
+      description: 'Routes for a specific mission',
     },
     async (uri, { missionId }) => {
-      const routes = await apiGet("/missions/routes", { missionId });
+      const routes = await apiGet('/missions/routes', { missionId });
       return {
         contents: [
           {
@@ -134,18 +131,18 @@ export function registerResources(server: McpServer) {
 
   // Resource: Server Configuration
   server.registerResource(
-    "server_config",
-    "server://config",
+    'server_config',
+    'server://config',
     {
-      title: "Server Configuration",
-      description: "Current server configuration",
+      title: 'Server Configuration',
+      description: 'Current server configuration',
     },
     async () => {
-      const config = await apiGet("/server");
+      const config = await apiGet('/server');
       return {
         contents: [
           {
-            uri: "server://config",
+            uri: 'server://config',
             text: JSON.stringify(config, null, 2),
           },
         ],

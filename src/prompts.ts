@@ -1,23 +1,23 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { apiGet } from "./utils.js";
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { apiGet } from './utils.js';
 
 export function registerPrompts(server: McpServer) {
   // Prompt: Analyze Device Statuses
   server.registerPrompt(
-    "analyze_status",
+    'analyze_status',
     {
-      title: "Analyze Device Statuses",
-      description: "Summarize the status of all UAV devices",
+      title: 'Analyze Device Statuses',
+      description: 'Summarize the status of all UAV devices',
       argsSchema: {},
     },
     async () => {
-      const devices = await apiGet("/devices");
+      const devices = await apiGet('/devices');
       return {
         messages: [
           {
-            role: "user",
+            role: 'user',
             content: {
-              type: "text",
+              type: 'text',
               text: `Analyze the following UAV device statuses:\n\n${JSON.stringify(
                 devices,
                 null,
@@ -32,25 +32,21 @@ export function registerPrompts(server: McpServer) {
 
   // Prompt: Find Devices with Low Battery
   server.registerPrompt(
-    "find_low_battery",
+    'find_low_battery',
     {
-      title: "Find Low Battery Devices",
-      description: "List UAVs with battery below 20%",
+      title: 'Find Low Battery Devices',
+      description: 'List UAVs with battery below 20%',
       argsSchema: {},
     },
     async () => {
-      const positions = await apiGet("/positions");
+      const positions = await apiGet('/positions');
       return {
         messages: [
           {
-            role: "user",
+            role: 'user',
             content: {
-              type: "text",
-              text: `Which UAVs have battery below 20%?\n\n${JSON.stringify(
-                positions,
-                null,
-                2
-              )}`,
+              type: 'text',
+              text: `Which UAVs have battery below 20%?\n\n${JSON.stringify(positions, null, 2)}`,
             },
           },
         ],
@@ -60,21 +56,21 @@ export function registerPrompts(server: McpServer) {
 
   // Prompt: Mission Planning
   server.registerPrompt(
-    "mission_planning",
+    'mission_planning',
     {
-      title: "Mission Planning",
-      description: "Help plan a mission for UAV devices",
+      title: 'Mission Planning',
+      description: 'Help plan a mission for UAV devices',
       argsSchema: {},
     },
     async () => {
-      const devices = await apiGet("/devices");
-      const missions = await apiGet("/missions/");
+      const devices = await apiGet('/devices');
+      const missions = await apiGet('/missions/');
       return {
         messages: [
           {
-            role: "user",
+            role: 'user',
             content: {
-              type: "text",
+              type: 'text',
               text: `Help me plan a mission using the following available devices and current missions:\n\nDevices:\n${JSON.stringify(
                 devices,
                 null,
@@ -89,21 +85,21 @@ export function registerPrompts(server: McpServer) {
 
   // Prompt: Flight Safety Check
   server.registerPrompt(
-    "safety_check",
+    'safety_check',
     {
-      title: "Flight Safety Check",
-      description: "Perform a safety check on UAV devices before flight",
+      title: 'Flight Safety Check',
+      description: 'Perform a safety check on UAV devices before flight',
       argsSchema: {},
     },
     async () => {
-      const devices = await apiGet("/devices");
-      const positions = await apiGet("/positions");
+      const devices = await apiGet('/devices');
+      const positions = await apiGet('/positions');
       return {
         messages: [
           {
-            role: "user",
+            role: 'user',
             content: {
-              type: "text",
+              type: 'text',
               text: `Perform a safety check on the UAV devices. Check battery levels, connection status, and any alarms:\n\nDevices:\n${JSON.stringify(
                 devices,
                 null,
@@ -118,21 +114,21 @@ export function registerPrompts(server: McpServer) {
 
   // Prompt: Mission Status Report
   server.registerPrompt(
-    "mission_status",
+    'mission_status',
     {
-      title: "Mission Status Report",
-      description: "Generate a report on current mission status",
+      title: 'Mission Status Report',
+      description: 'Generate a report on current mission status',
       argsSchema: {},
     },
     async () => {
-      const missions = await apiGet("/missions/");
-      const positions = await apiGet("/positions");
+      const missions = await apiGet('/missions/');
+      const positions = await apiGet('/positions');
       return {
         messages: [
           {
-            role: "user",
+            role: 'user',
             content: {
-              type: "text",
+              type: 'text',
               text: `Generate a mission status report based on the following data:\n\nMissions:\n${JSON.stringify(
                 missions,
                 null,
@@ -147,21 +143,21 @@ export function registerPrompts(server: McpServer) {
 
   // Prompt: Analyze Flight Data
   server.registerPrompt(
-    "analyze_flight_data",
+    'analyze_flight_data',
     {
-      title: "Analyze Flight Data",
-      description: "Analyze flight data and performance metrics",
+      title: 'Analyze Flight Data',
+      description: 'Analyze flight data and performance metrics',
       argsSchema: {},
     },
     async () => {
-      const positions = await apiGet("/positions");
-      const files = await apiGet("/files/get");
+      const positions = await apiGet('/positions');
+      const files = await apiGet('/files/get');
       return {
         messages: [
           {
-            role: "user",
+            role: 'user',
             content: {
-              type: "text",
+              type: 'text',
               text: `Analyze the flight data and performance metrics:\n\nPosition Data:\n${JSON.stringify(
                 positions,
                 null,

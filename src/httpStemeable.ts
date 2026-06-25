@@ -1,11 +1,11 @@
-import express from "express";
-import { randomUUID } from "node:crypto";
-import cors from "cors";
+import express from 'express';
+import { randomUUID } from 'node:crypto';
+import cors from 'cors';
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
-import { createServer } from "./server.js";
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
+import { createServer } from './server.js';
 
 export function httpStreamableSever(_unused: McpServer, port: number) {
   const app = express();
@@ -26,13 +26,13 @@ export function httpStreamableSever(_unused: McpServer, port: number) {
   const servers: { [sessionId: string]: McpServer } = {};
 
   // Handle POST requests for client-to-server communication
-  app.post("/mcp", async (req, res) => {
+  app.post('/mcp', async (req, res) => {
     console.log(`Request received: ${req.method} ${req.url}`, {
       body: req.body,
     });
 
     // Check for existing session ID
-    const sessionId = req.headers["mcp-session-id"] as string | undefined;
+    const sessionId = req.headers['mcp-session-id'] as string | undefined;
     let transport: StreamableHTTPServerTransport;
 
     if (sessionId && transports[sessionId]) {
@@ -42,7 +42,7 @@ export function httpStreamableSever(_unused: McpServer, port: number) {
       // New initialization request
       transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: () => randomUUID(),
-        onsessioninitialized: (sessionId) => {
+        onsessioninitialized: sessionId => {
           // Store the transport by session ID
           transports[sessionId] = transport;
         },
@@ -67,10 +67,10 @@ export function httpStreamableSever(_unused: McpServer, port: number) {
     } else {
       // Invalid request
       res.status(400).json({
-        jsonrpc: "2.0",
+        jsonrpc: '2.0',
         error: {
           code: -32000,
-          message: "Bad Request: No valid session ID provided",
+          message: 'Bad Request: No valid session ID provided',
         },
         id: null,
       });
@@ -78,11 +78,15 @@ export function httpStreamableSever(_unused: McpServer, port: number) {
     }
 
     // Handle the request
-    res.on("close", () => {
-      console.log(`[MCP-DEBUG] Response CLOSED for request id: ${req.body?.id}, method: ${req.body?.method}`);
+    res.on('close', () => {
+      console.log(
+        `[MCP-DEBUG] Response CLOSED for request id: ${req.body?.id}, method: ${req.body?.method}`
+      );
     });
-    res.on("finish", () => {
-      console.log(`[MCP-DEBUG] Response FINISHED for request id: ${req.body?.id}, method: ${req.body?.method}`);
+    res.on('finish', () => {
+      console.log(
+        `[MCP-DEBUG] Response FINISHED for request id: ${req.body?.id}, method: ${req.body?.method}`
+      );
     });
     console.log(`[MCP-DEBUG] Calling handleRequest for id: ${req.body?.id}`);
     await transport.handleRequest(req, res, req.body);
@@ -90,13 +94,10 @@ export function httpStreamableSever(_unused: McpServer, port: number) {
   });
 
   // Reusable handler for GET and DELETE requests
-  const handleSessionRequest = async (
-    req: express.Request,
-    res: express.Response
-  ) => {
-    const sessionId = req.headers["mcp-session-id"] as string | undefined;
+  const handleSessionRequest = async (req: express.Request, res: express.Response) => {
+    const sessionId = req.headers['mcp-session-id'] as string | undefined;
     if (!sessionId || !transports[sessionId]) {
-      res.status(400).send("Invalid or missing session ID");
+      res.status(400).send('Invalid or missing session ID');
       return;
     }
 
@@ -105,47 +106,42 @@ export function httpStreamableSever(_unused: McpServer, port: number) {
   };
 
   // Handle GET requests for server-to-client notifications via SSE
-  app.get("/mcp", handleSessionRequest);
+  app.get('/mcp', handleSessionRequest);
 
   // Handle DELETE requests for session termination
-  app.delete("/mcp", handleSessionRequest);
+  app.delete('/mcp', handleSessionRequest);
 
   const express_server = app.listen(port, () => {
     console.log(`MCP Streamable HTTP Server listening on port ${port}`);
   });
 
   // Add server event listeners for better visibility
-  express_server.on("connect", (transport) => {
+  express_server.on('connect', transport => {
     console.log(`[Server] Transport connected: ${transport}`);
   });
 
-  express_server.on("disconnect", (transport) => {
+  express_server.on('disconnect', transport => {
     console.log(`[Server] Transport disconnected: ${transport.sessionId}`);
   });
 
-  express_server.on("request", (request, transport) => {
-    console.log(
-      `[Server] Received request: ${request.method} from transport: ${transport}`
-    );
+  express_server.on('request', (request, transport) => {
+    console.log(`[Server] Received request: ${request.method} from transport: ${transport}`);
   });
 
-  express_server.on("response", (response, transport) => {
+  express_server.on('response', (response, transport) => {
     console.log(
       `[Server] Sending response for id: ${response.id} to transport: ${transport.sessionId}`
     );
   });
 
-  express_server.on("notification", (notification, transport) => {
+  express_server.on('notification', (notification, transport) => {
     console.log(
       `[Server] Sending notification: ${notification.method} to transport: ${transport.sessionId}`
     );
   });
 
-  express_server.on("error", (error: any, transport: any) => {
-    console.error(
-      `[Server] Error with transport ${transport?.sessionId || "unknown"}:`,
-      error
-    );
+  express_server.on('error', (error: any, transport: any) => {
+    console.error(`[Server] Error with transport ${transport?.sessionId || 'unknown'}:`, error);
   });
 }
 
@@ -153,32 +149,31 @@ export function httpStreamableSeverStandalone(server: McpServer, port: number) {
   const app = express();
   app.use(express.json());
 
-  app.post("/mcp", async (req, res) => {
+  app.post('/mcp', async (req, res) => {
     // In stateless mode, create a new instance of transport and server for each request
     // to ensure complete isolation. A single instance would cause request ID collisions
     // when multiple clients connect concurrently.
 
     try {
       //const server = getServer();
-      const transport: StreamableHTTPServerTransport =
-        new StreamableHTTPServerTransport({
-          sessionIdGenerator: undefined,
-        });
-      res.on("close", () => {
-        console.log("Request closed");
+      const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+      });
+      res.on('close', () => {
+        console.log('Request closed');
         transport.close();
         server.close();
       });
       await server.connect(transport);
       await transport.handleRequest(req, res, req.body);
     } catch (error) {
-      console.error("Error handling MCP request:", error);
+      console.error('Error handling MCP request:', error);
       if (!res.headersSent) {
         res.status(500).json({
-          jsonrpc: "2.0",
+          jsonrpc: '2.0',
           error: {
             code: -32603,
-            message: "Internal server error",
+            message: 'Internal server error',
           },
           id: null,
         });
@@ -187,14 +182,14 @@ export function httpStreamableSeverStandalone(server: McpServer, port: number) {
   });
 
   // SSE notifications not supported in stateless mode
-  app.get("/mcp", async (req, res) => {
-    console.log("Received GET MCP request");
+  app.get('/mcp', async (req, res) => {
+    console.log('Received GET MCP request');
     res.writeHead(405).end(
       JSON.stringify({
-        jsonrpc: "2.0",
+        jsonrpc: '2.0',
         error: {
           code: -32000,
-          message: "Method not allowed.",
+          message: 'Method not allowed.',
         },
         id: null,
       })
@@ -202,14 +197,14 @@ export function httpStreamableSeverStandalone(server: McpServer, port: number) {
   });
 
   // Session termination not needed in stateless mode
-  app.delete("/mcp", async (req, res) => {
-    console.log("Received DELETE MCP request");
+  app.delete('/mcp', async (req, res) => {
+    console.log('Received DELETE MCP request');
     res.writeHead(405).end(
       JSON.stringify({
-        jsonrpc: "2.0",
+        jsonrpc: '2.0',
         error: {
           code: -32000,
-          message: "Method not allowed.",
+          message: 'Method not allowed.',
         },
         id: null,
       })
@@ -218,9 +213,7 @@ export function httpStreamableSeverStandalone(server: McpServer, port: number) {
 
   // Start the server
   app.listen(port, () => {
-    console.log(
-      `MCP Stateless Streamable HTTP Server listening on port ${port}`
-    );
+    console.log(`MCP Stateless Streamable HTTP Server listening on port ${port}`);
   });
 
   // Note: In a stateless server, you may want to implement a cleanup mechanism
