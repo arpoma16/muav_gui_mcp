@@ -30,7 +30,7 @@ export function registerPlanningTools(server: McpServer) {
     `Returns all operation bases with their GPS positions and assigned drones. Each base includes id, coordinates, and assigned device (or null). Use when drone positions are unknown, drones are offline, or you need departure points for mission planning.`,
     {},
     async () => {
-      const data = await apiGet('markers/bases/assigned');
+      const data = await apiGet('/markers/bases/assigned');
 
       const basesWithDrones = data.filter((b: { device: unknown }) => b.device !== null);
       const basesWithoutDrones = data.filter((b: { device: unknown }) => b.device === null);
