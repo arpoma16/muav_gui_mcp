@@ -92,7 +92,7 @@ On timeout: check robot position — if within 0.5 m of goal, treat as success; 
       let result: any;
       try {
         result = await apiPost(
-          '/ros/action_send_goal',
+          '/ros/action_send_goal_raw',
           {
             action: `/${deviceName}/navigate_to_pose`,
             actionType: 'nav2_msgs/action/NavigateToPose',
@@ -188,7 +188,7 @@ On timeout: check robot position — if within 0.5 m of goal, treat as success; 
     },
     async ({ deviceName }) => {
       const action = `/${deviceName}/navigate_to_pose`;
-      const result = await apiGet('/ros/action_status', { action });
+      const result = await apiGet('/ros/action_status_raw', { action });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };
@@ -203,7 +203,7 @@ On timeout: check robot position — if within 0.5 m of goal, treat as success; 
     },
     async ({ deviceName }) => {
       const action = `/${deviceName}/navigate_to_pose`;
-      const result = await apiPost('/ros/action_cancel', { action });
+      const result = await apiPost('/ros/action_cancel_raw', { action });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };
@@ -489,7 +489,7 @@ Returns: { goal_x, goal_y, yaw_world, state, msg } — goal_x/goal_y are the com
       let result: any;
       try {
         result = await apiPost(
-          '/ros/action_send_goal',
+          '/ros/action_send_goal_raw',
           {
             action: `/${deviceName}/navigate_to_pose`,
             actionType: 'nav2_msgs/action/NavigateToPose',
